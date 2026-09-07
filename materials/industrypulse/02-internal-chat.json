@@ -1,0 +1,41 @@
+{
+  "projectId": "industrypulse",
+  "projectName": "IndustryPulse",
+  "projectDescription": "Внутренний сервис мониторинга оборудования промышленной компании.",
+  "sourceId": "industrypulse.internal-chat",
+  "kind": "InternalChat",
+  "title": "Внутренний чат команды",
+  "occurredOn": "2026-09-08",
+  "order": 2,
+  "splitByProject": false,
+  "messages": [
+    {
+      "id": "industrypulse.ic.11-10",
+      "at": "11:10",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "После получения MES API нужно проверить, есть ли все поля для аварийных статусов и времени простоя."
+    },
+    {
+      "id": "industrypulse.ic.11-18",
+      "at": "11:18",
+      "author": "Разработчик",
+      "side": "Xpage",
+      "text": "Ок, без спецификации пока не проверить."
+    },
+    {
+      "id": "industrypulse.ic.15-12",
+      "at": "15:12",
+      "author": "Аналитик",
+      "side": "Xpage",
+      "text": "По ролям нужно ещё понять доступ администратора."
+    },
+    {
+      "id": "industrypulse.ic.15-20",
+      "at": "15:20",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Запрошу у клиента на следующем созвоне."
+    }
+  ]
+}

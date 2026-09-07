@@ -1,0 +1,85 @@
+{
+  "projectId": "stress",
+  "projectName": "Стресс-тест",
+  "projectDescription": "Смешанная коммуникация трёх проектов.",
+  "sourceId": "stress",
+  "kind": "ClientChat",
+  "title": "Стресс-тест: смешанные проекты",
+  "occurredOn": "2026-09-09",
+  "order": 9,
+  "splitByProject": true,
+  "messages": [
+    {
+      "id": "stress.09-00",
+      "at": "09:00",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Историю заявок в личном кабинете обсудим с отделом продаж до четверга.",
+      "projectId": "urbankey"
+    },
+    {
+      "id": "stress.09-02",
+      "at": "09:02",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Интегратор подтвердил спецификацию MES API к пятнице.",
+      "projectId": "industrypulse"
+    },
+    {
+      "id": "stress.09-05",
+      "at": "09:05",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Баннер пришлю завтра до 12:00.",
+      "projectId": "retailflow"
+    },
+    {
+      "id": "stress.09-07",
+      "at": "09:07",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Хорошо, фиксирую открытый вопрос по истории заявок.",
+      "projectId": "urbankey"
+    },
+    {
+      "id": "stress.09-10",
+      "at": "09:10",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Принято, ждём баннер завтра до 12:00.",
+      "projectId": "retailflow"
+    },
+    {
+      "id": "stress.09-12",
+      "at": "09:12",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "После получения спецификации проверим состав данных.",
+      "projectId": "industrypulse"
+    },
+    {
+      "id": "stress.09-15",
+      "at": "09:15",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Ок, спасибо.",
+      "projectId": "retailflow"
+    },
+    {
+      "id": "stress.09-17",
+      "at": "09:17",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Цены в карточках показываем только после авторизации.",
+      "projectId": "urbankey"
+    },
+    {
+      "id": "stress.09-20",
+      "at": "09:20",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Канал уведомлений пока не выбрали.",
+      "projectId": "industrypulse"
+    }
+  ]
+}

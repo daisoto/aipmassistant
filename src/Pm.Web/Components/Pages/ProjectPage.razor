@@ -1,0 +1,185 @@
+@page "/project/{ProjectId}"
+@rendermode InteractiveServer
+@inject IPmStore Store
+
+<PageTitle>@(_project?.Name ?? "Проект") — трекер</PageTitle>
+
+@if (_project is null)
+{
+    <p class="empty">Проект не найден.</p>
+}
+else
+{
+    <h1>@_project.Name</h1>
+    <p class="muted">@_project.Description</p>
+
+    <div class="actions">
+        @foreach (var source in _sources.Where(s => s.Kind == SourceKind.CallTranscript))
+        {
+            <a class="button" href="@($"/project/{ProjectId}/call/{source.Id}")">Post-meeting: @source.Title</a>
+        }
+    </div>
+
+    <div class="views">
+        @foreach (var view in TrackerViews.All)
+        {
+            var items = TrackerViews.Filter(_items, view);
+            <section class="view">
+                <h2>@TrackerViews.Title(view) <span class="count">@items.Count</span></h2>
+                @if (items.Count == 0)
+                {
+                    <p class="muted small">Пусто</p>
+                }
+                else
+                {
+                    <ul class="items">
+                        @foreach (var item in items)
+                        {
+                            <li class="@(_selected?.Id == item.Id ? "item selected" : "item")"
+                                @onclick="() => Select(item)">
+                                <div class="title">@item.Title</div>
+                                <div class="meta">
+                                    <span class="chip kind-@item.Kind.ToString().ToLowerInvariant()">@KindLabel(item.Kind)</span>
+                                    <span class="chip side">@SideLabel(item.Side)</span>
+                                    @if (!string.IsNullOrWhiteSpace(item.Assignee))
+                                    {
+                                        <span class="chip">@item.Assignee</span>
+                                    }
+                                    @if (item.DueKind == DueKind.Explicit && item.DueAt is not null)
+                                    {
+                                        <span class="chip due">@item.DueAt.Value.ToLocalTime().ToString("dd.MM HH:mm")</span>
+                                    }
+                                    else if (item.DueKind == DueKind.Vague)
+                                    {
+                                        <span class="chip vague">срок не зафиксирован</span>
+                                    }
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </section>
+        }
+    </div>
+
+    @{
+        var others = TrackerViews.Uncategorized(_items);
+    }
+    @if (others.Count > 0)
+    {
+        <h2>Решения и зафиксированное <span class="count">@others.Count</span></h2>
+        <ul class="items flat">
+            @foreach (var item in others)
+            {
+                <li class="@(_selected?.Id == item.Id ? "item selected" : "item")" @onclick="() => Select(item)">
+                    <div class="title">
+                        @item.Title
+                        @if (item.Status == ItemStatus.Superseded)
+                        {
+                            <span class="chip superseded">заменено</span>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+
+    @if (_selected is not null)
+    {
+        <aside class="detail">
+            <h2>@_selected.Title</h2>
+            <p class="muted">@_selected.Body</p>
+
+            <dl>
+                <dt>Тип</dt><dd>@KindLabel(_selected.Kind)</dd>
+                <dt>Сторона</dt><dd>@SideLabel(_selected.Side)</dd>
+                <dt>Статус</dt><dd>@_selected.Status</dd>
+                <dt>Исполнитель</dt><dd>@(_selected.Assignee ?? "не назван в переписке")</dd>
+                <dt>Срок</dt>
+                <dd>
+                    @if (_selected.DueKind == DueKind.Explicit && _selected.DueAt is not null)
+                    {
+                        @($"{_selected.DueAt.Value.ToLocalTime():dd.MM.yyyy HH:mm} — из цитаты «{_selected.DueQuote}»")
+                    }
+                    else if (_selected.DueKind == DueKind.Vague)
+                    {
+                        @($"не зафиксирован: «{_selected.DueQuote}»")
+                    }
+                    else
+                    {
+                        @("в коммуникации срока нет")
+                    }
+                </dd>
+            </dl>
+
+            <h3>История</h3>
+            <ol class="history">
+                @foreach (var rev in _selected.Revisions.OrderBy(r => r.CreatedAt))
+                {
+                    <li>
+                        <strong>@rev.Op</strong> — @rev.Summary
+                        @if (!string.IsNullOrWhiteSpace(rev.Reason))
+                        {
+                            <div class="muted small">@rev.Reason</div>
+                        }
+                    </li>
+                }
+            </ol>
+
+            <h3>Сообщения-источники</h3>
+            <ul class="evidence">
+                @foreach (var message in _evidence)
+                {
+                    <li>
+                        <span class="muted small">[@message.At] @message.AuthorName</span>
+                        <div>@message.Text</div>
+                    </li>
+                }
+            </ul>
+        </aside>
+    }
+}
+
+@code {
+    [Parameter] public string ProjectId { get; set; } = "";
+
+    private Project? _project;
+    private IReadOnlyList<Source> _sources = [];
+    private IReadOnlyList<WorkItem> _items = [];
+    private WorkItem? _selected;
+    private IReadOnlyList<Message> _evidence = [];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _project = await Store.GetProjectAsync(ProjectId);
+        if (_project is null) return;
+        _sources = await Store.GetSourcesAsync(ProjectId);
+        _items = await Store.GetItemsAsync(ProjectId);
+        _selected = null;
+        _evidence = [];
+    }
+
+    private async Task Select(WorkItem item)
+    {
+        _selected = item;
+        _evidence = await Store.GetMessagesByIdsAsync(item.Evidence.Select(e => e.MessageId));
+    }
+
+    private static string KindLabel(ItemKind kind) => kind switch
+    {
+        ItemKind.Task => "задача",
+        ItemKind.Decision => "решение",
+        ItemKind.Requirement => "требование",
+        ItemKind.OpenQuestion => "открытый вопрос",
+        ItemKind.Dependency => "зависимость",
+        _ => kind.ToString()
+    };
+
+    private static string SideLabel(Side side) => side switch
+    {
+        Side.Xpage => "мы",
+        Side.Client => "клиент",
+        Side.Contractor => "подрядчик",
+        _ => side.ToString()
+    };
+}

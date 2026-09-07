@@ -1,0 +1,210 @@
+{
+  "projectId": "industrypulse",
+  "set": "holdout",
+  "items": [
+    {
+      "id": "industrypulse.emergency-indicator",
+      "kind": "Requirement",
+      "title": "Отдельный индикатор аварийных остановок в дашборде",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "индикатор аварийных остановок"
+      ],
+      "evidence": [
+        "industrypulse.cc.09-05"
+      ],
+      "traps": []
+    },
+    {
+      "id": "industrypulse.emergency-rule",
+      "kind": "Decision",
+      "title": "Авария определяется по статусу MES, при недоступности — простой больше 20 минут",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "определение аварии",
+        "статус mes",
+        "простой больше 20 минут"
+      ],
+      "evidence": [
+        "industrypulse.cc.09-10",
+        "industrypulse.cc.09-16",
+        "industrypulse.cc.09-22",
+        "industrypulse.call.00-14",
+        "industrypulse.call.00-27",
+        "industrypulse.call.00-33"
+      ],
+      "traps": [
+        "multi-step-evolution"
+      ]
+    },
+    {
+      "id": "industrypulse.threshold-configurable",
+      "kind": "Decision",
+      "title": "Порог простоя делаем настраиваемым параметром",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "настраиваемый параметр",
+        "порог простоя"
+      ],
+      "evidence": [
+        "industrypulse.call.00-47",
+        "industrypulse.call.00-59",
+        "industrypulse.call.01-07"
+      ],
+      "traps": [
+        "multi-step-evolution"
+      ]
+    },
+    {
+      "id": "industrypulse.mes-api-spec",
+      "kind": "Dependency",
+      "title": "Интегратор передаёт спецификацию MES API",
+      "side": "Contractor",
+      "assignee": null,
+      "due": "2026-09-11T18:00:00+05:00",
+      "dueQuote": "к пятнице",
+      "dueKind": "Explicit",
+      "isPromiseToClient": false,
+      "aliases": [
+        "спецификация mes api"
+      ],
+      "evidence": [
+        "industrypulse.cc.10-47",
+        "industrypulse.call.01-50",
+        "stress.09-02"
+      ],
+      "traps": [
+        "three-party",
+        "stress-dedup"
+      ]
+    },
+    {
+      "id": "industrypulse.mes-fields-check",
+      "kind": "Task",
+      "title": "Проверить состав данных MES API после получения спецификации",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "состав данных",
+        "поля аварийных статусов"
+      ],
+      "evidence": [
+        "industrypulse.cc.10-50",
+        "industrypulse.ic.11-10",
+        "industrypulse.ic.11-18",
+        "industrypulse.call.02-02",
+        "stress.09-12"
+      ],
+      "traps": [
+        "dependency-link"
+      ]
+    },
+    {
+      "id": "industrypulse.shift-notifications",
+      "kind": "Requirement",
+      "title": "Уведомления начальнику смены",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "уведомления начальнику смены"
+      ],
+      "evidence": [
+        "industrypulse.cc.12-03"
+      ],
+      "traps": []
+    },
+    {
+      "id": "industrypulse.notification-channel",
+      "kind": "OpenQuestion",
+      "title": "Канал уведомлений не выбран: email или корпоративный мессенджер",
+      "side": "Client",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "канал уведомлений"
+      ],
+      "evidence": [
+        "industrypulse.cc.12-08",
+        "industrypulse.cc.12-12",
+        "industrypulse.cc.12-16",
+        "industrypulse.call.01-21",
+        "industrypulse.call.01-27",
+        "industrypulse.call.01-36",
+        "stress.09-20"
+      ],
+      "traps": [
+        "stress-dedup"
+      ]
+    },
+    {
+      "id": "industrypulse.roles-model",
+      "kind": "Requirement",
+      "title": "Ролевая модель: оператор, начальник смены, администратор группы заводов",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": "срок не критичный",
+      "dueKind": "Vague",
+      "isPromiseToClient": false,
+      "aliases": [
+        "роли",
+        "ролевая модель"
+      ],
+      "evidence": [
+        "industrypulse.cc.14-42",
+        "industrypulse.em.01"
+      ],
+      "traps": [
+        "vague-deadline",
+        "email-source"
+      ]
+    },
+    {
+      "id": "industrypulse.admin-access-question",
+      "kind": "Task",
+      "title": "Уточнить у клиента доступ администратора",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "доступ администратора"
+      ],
+      "evidence": [
+        "industrypulse.ic.15-12",
+        "industrypulse.ic.15-20"
+      ],
+      "traps": [
+        "unfulfilled-promise"
+      ]
+    }
+  ]
+}

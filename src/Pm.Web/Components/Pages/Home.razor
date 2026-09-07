@@ -1,0 +1,172 @@
+@page "/"
+@rendermode InteractiveServer
+@inject IPmStore Store
+@inject MaterialLoader Loader
+@inject PipelineRunner Pipeline
+@inject ILlmClient Llm
+@inject IEmbeddingClient Embeddings
+
+<PageTitle>Проекты — AI-ассистент PM</PageTitle>
+
+<h1>Проекты</h1>
+
+<p class="muted">
+    Провайдер модели: <code>@Llm.Name</code> · эмбеддинги: <code>@Embeddings.Name</code>
+</p>
+
+<div class="actions">
+    <button class="primary" disabled="@_busy" @onclick="LoadMaterialsAsync">Загрузить материалы</button>
+    <button disabled="@(_busy || _projects.Count == 0)" @onclick="RunAllAsync">Прогнать все источники</button>
+</div>
+
+@if (_busy)
+{
+    <p class="badge running">@_status</p>
+}
+else if (!string.IsNullOrEmpty(_status))
+{
+    <p class="badge">@_status</p>
+}
+
+@if (_projects.Count == 0)
+{
+    <p class="empty">
+        Проектов пока нет. Нажмите «Загрузить материалы» — из папки <code>materials/</code>
+        будут прочитаны чаты, письма и транскрипты трёх проектов.
+    </p>
+}
+else
+{
+    <table class="grid">
+        <thead>
+        <tr>
+            <th>Проект</th>
+            <th>Источники</th>
+            <th>Обработано</th>
+            <th>Сущности</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var row in _projects)
+        {
+            <tr>
+                <td>
+                    <strong>@row.Project.Name</strong>
+                    <div class="muted small">@row.Project.Description</div>
+                </td>
+                <td class="num">@row.SourceCount</td>
+                <td class="num">@row.IngestedCount</td>
+                <td class="num">@row.ItemCount</td>
+                <td><a href="@($"/project/{row.Project.Id}")">Открыть трекер →</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@if (_reports.Count > 0)
+{
+    <h2>Последний прогон</h2>
+    <table class="grid">
+        <thead>
+        <tr>
+            <th>Источник</th>
+            <th>Сообщений</th>
+            <th>Кандидатов</th>
+            <th>Создано</th>
+            <th>Обновлено</th>
+            <th>Заменено</th>
+            <th>Шум</th>
+            <th>Сроков отброшено</th>
+            <th>мс</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var r in _reports)
+        {
+            <tr>
+                <td>@r.SourceTitle</td>
+                <td class="num">@r.MessageCount</td>
+                <td class="num">@r.CandidateCount</td>
+                <td class="num">@r.Created</td>
+                <td class="num">@r.Updated</td>
+                <td class="num">@r.Superseded</td>
+                <td class="num">@r.Noise</td>
+                <td class="num">@r.DeadlinesDropped</td>
+                <td class="num">@r.ElapsedMs</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private sealed record ProjectRow(Project Project, int SourceCount, int IngestedCount, int ItemCount);
+
+    private List<ProjectRow> _projects = [];
+    private List<IngestReport> _reports = [];
+    private bool _busy;
+    private string _status = "";
+
+    protected override async Task OnInitializedAsync() => await RefreshAsync();
+
+    private async Task RefreshAsync()
+    {
+        var rows = new List<ProjectRow>();
+        foreach (var project in await Store.GetProjectsAsync())
+        {
+            var sources = await Store.GetSourcesAsync(project.Id);
+            var items = await Store.GetItemsAsync(project.Id);
+            rows.Add(new ProjectRow(project, sources.Count, sources.Count(s => s.Ingested), items.Count));
+        }
+
+        _projects = rows;
+    }
+
+    private async Task LoadMaterialsAsync()
+    {
+        _busy = true;
+        _status = "Читаю materials/…";
+        try
+        {
+            var count = await Loader.LoadAllAsync();
+            await RefreshAsync();
+            _status = $"Загружено источников: {count}.";
+        }
+        catch (Exception ex)
+        {
+            _status = "Ошибка загрузки: " + ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task RunAllAsync()
+    {
+        _busy = true;
+        _reports.Clear();
+        try
+        {
+            foreach (var row in _projects)
+            {
+                _status = $"Обрабатываю {row.Project.Name}…";
+                StateHasChanged();
+                _reports.AddRange(await Pipeline.RunProjectAsync(row.Project.Id));
+            }
+
+            await RefreshAsync();
+            _status = $"Готово. Обработано источников: {_reports.Count}.";
+        }
+        catch (Exception ex)
+        {
+            _status = "Ошибка прогона: " + ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

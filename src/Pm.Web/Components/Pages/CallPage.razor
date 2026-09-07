@@ -1,0 +1,112 @@
+@page "/project/{ProjectId}/call/{SourceId}"
+@rendermode InteractiveServer
+@inject IPmStore Store
+@inject PostMeetingComposer Composer
+@inject ILlmClient Llm
+@inject Microsoft.Extensions.Options.IOptions<Pm.Infrastructure.Llm.LlmOptions> LlmOptions
+
+<PageTitle>Post-meeting</PageTitle>
+
+<h1>Созвон: @(_source?.Title ?? SourceId)</h1>
+<p class="muted">
+    <a href="@($"/project/{ProjectId}")">← к трекеру</a>
+    @if (_source is not null)
+    {
+        <span> · дата встречи @_source.OccurredOn.ToString("dd.MM.yyyy")</span>
+    }
+</p>
+
+<div class="actions">
+    <button class="primary" disabled="@_busy" @onclick="ComposeAsync">Сформировать post-meeting</button>
+</div>
+
+@if (!string.IsNullOrEmpty(_status))
+{
+    <p class="badge">@_status</p>
+}
+
+<div class="two-col">
+    <section>
+        <h2>Транскрипт</h2>
+        <ul class="transcript">
+            @foreach (var message in _messages)
+            {
+                <li>
+                    <span class="muted small">@message.At @message.AuthorName</span>
+                    <div>@message.Text</div>
+                </li>
+            }
+        </ul>
+    </section>
+
+    <section>
+        <h2>Post-meeting</h2>
+        @if (_doc is null)
+        {
+            <p class="muted">
+                Нажмите «Сформировать post-meeting». В документ попадёт только то, что затронуто
+                этим созвоном; разложение по секциям детерминированное.
+            </p>
+        }
+        else
+        {
+            @if (_doc.GuardViolations.Count > 0)
+            {
+                <div class="badge warn">
+                    Полировка формулировок отклонена валидатором:
+                    <ul>
+                        @foreach (var violation in _doc.GuardViolations)
+                        {
+                            <li>@violation</li>
+                        }
+                    </ul>
+                    Использован неотполированный вариант.
+                </div>
+            }
+            <pre class="postmeeting">@_doc.RenderedText</pre>
+            <p class="muted small">
+                Проверку, корректировку и отправку выполняет PM — сервис с клиентом не общается.
+            </p>
+        }
+    </section>
+</div>
+
+@code {
+    [Parameter] public string ProjectId { get; set; } = "";
+    [Parameter] public string SourceId { get; set; } = "";
+
+    private Source? _source;
+    private IReadOnlyList<Message> _messages = [];
+    private PostMeetingDoc? _doc;
+    private bool _busy;
+    private string _status = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _source = await Store.GetSourceAsync(SourceId);
+        _messages = await Store.GetMessagesAsync(SourceId);
+        _doc = (await Store.GetPostMeetingsAsync(ProjectId)).FirstOrDefault(d => d.SourceId == SourceId);
+    }
+
+    private async Task ComposeAsync()
+    {
+        _busy = true;
+        _status = "";
+        try
+        {
+            var polisher = LlmOptions.Value.PolishPostMeeting ? Llm : null;
+            _doc = await Composer.ComposeAsync(SourceId, polisher);
+            _status = _doc.PolishApplied
+                ? "Документ сформирован, формулировки отполированы моделью."
+                : "Документ сформирован.";
+        }
+        catch (Exception ex)
+        {
+            _status = "Ошибка: " + ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

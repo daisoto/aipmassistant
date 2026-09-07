@@ -1,0 +1,15 @@
+{
+  "expectedNewItems": 0,
+  "sourceIds": [
+    "stress.urbankey",
+    "stress.retailflow",
+    "stress.industrypulse"
+  ],
+  "expectedUpdatedTitles": [
+    "История заявок в личном кабинете",
+    "Спецификация MES API",
+    "Баннер для главной",
+    "Цены в карточках только после авторизации",
+    "Канал уведомлений"
+  ]
+}

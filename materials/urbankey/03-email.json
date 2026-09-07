@@ -1,0 +1,20 @@
+{
+  "projectId": "urbankey",
+  "projectName": "UrbanKey",
+  "projectDescription": "Корпоративный сайт девелопера: каталог объектов, подбор квартир, личный кабинет и CRM-интеграция.",
+  "sourceId": "urbankey.email",
+  "kind": "Email",
+  "title": "Письмо: формат еженедельного статуса",
+  "occurredOn": "2026-09-08",
+  "order": 3,
+  "splitByProject": false,
+  "messages": [
+    {
+      "id": "urbankey.em.01",
+      "at": null,
+      "author": "product@urbankey.test",
+      "side": "Client",
+      "text": "Тема: Формат еженедельного статуса. Коллеги, с этой недели просим в статусе отдельно показывать: выполнено, план следующей недели, вопросы на нашей стороне и риски. Первый статус в новом формате — в пятницу, 11 сентября."
+    }
+  ]
+}

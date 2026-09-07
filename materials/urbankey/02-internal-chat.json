@@ -1,0 +1,41 @@
+{
+  "projectId": "urbankey",
+  "projectName": "UrbanKey",
+  "projectDescription": "Корпоративный сайт девелопера: каталог объектов, подбор квартир, личный кабинет и CRM-интеграция.",
+  "sourceId": "urbankey.internal-chat",
+  "kind": "InternalChat",
+  "title": "Внутренний чат команды",
+  "occurredOn": "2026-09-08",
+  "order": 2,
+  "splitByProject": false,
+  "messages": [
+    {
+      "id": "urbankey.ic.15-10",
+      "at": "15:10",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Коллеги, нужна проверка: видео mp4 до 100 МБ в «Ходе строительства». Посмотрите ограничения по хранению и загрузке, ответ нужен завтра до 13:00."
+    },
+    {
+      "id": "urbankey.ic.15-22",
+      "at": "15:22",
+      "author": "Разработчик",
+      "side": "Xpage",
+      "text": "Посмотрю утром."
+    },
+    {
+      "id": "urbankey.ic.16-05",
+      "at": "16:05",
+      "author": "Аналитик",
+      "side": "Xpage",
+      "text": "По фильтру срока сдачи вопросов нет, можно планировать в следующий спринт."
+    },
+    {
+      "id": "urbankey.ic.16-15",
+      "at": "16:15",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Ок, срок с клиентом согласован на 14 сентября."
+    }
+  ]
+}

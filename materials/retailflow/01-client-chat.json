@@ -1,0 +1,104 @@
+{
+  "projectId": "retailflow",
+  "projectName": "RetailFlow",
+  "projectDescription": "Интернет-магазин розничной сети: каталог, корзина, доставка и программа лояльности.",
+  "sourceId": "retailflow.client-chat",
+  "kind": "ClientChat",
+  "title": "Клиентский чат",
+  "occurredOn": "2026-09-08",
+  "order": 1,
+  "splitByProject": false,
+  "messages": [
+    {
+      "id": "retailflow.cc.10-01",
+      "at": "10:01",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "На запуске хотим оставить только самовывоз, курьерскую доставку убрать."
+    },
+    {
+      "id": "retailflow.cc.10-05",
+      "at": "10:05",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Это временное решение только на запуск?"
+    },
+    {
+      "id": "retailflow.cc.10-09",
+      "at": "10:09",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Да."
+    },
+    {
+      "id": "retailflow.cc.10-18",
+      "at": "10:18",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Стоп, региональный директор просит оставить курьера для Москвы."
+    },
+    {
+      "id": "retailflow.cc.10-22",
+      "at": "10:22",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Тогда фиксирую: самовывоз — все регионы, курьер — только Москва. Верно?"
+    },
+    {
+      "id": "retailflow.cc.10-24",
+      "at": "10:24",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Да."
+    },
+    {
+      "id": "retailflow.cc.10-47",
+      "at": "10:47",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Нужна проверка бонусного баланса до оплаты."
+    },
+    {
+      "id": "retailflow.cc.10-50",
+      "at": "10:50",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Используем текущий loyalty API?"
+    },
+    {
+      "id": "retailflow.cc.10-52",
+      "at": "10:52",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Да."
+    },
+    {
+      "id": "retailflow.cc.12-14",
+      "at": "12:14",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Баннер для главной пришлю позже."
+    },
+    {
+      "id": "retailflow.cc.15-10",
+      "at": "15:10",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Баннер пришлю завтра до 12:00."
+    },
+    {
+      "id": "retailflow.cc.15-13",
+      "at": "15:13",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Принято."
+    },
+    {
+      "id": "retailflow.cc.17-01",
+      "at": "17:01",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "По доставке всё согласовано, спасибо."
+    }
+  ]
+}

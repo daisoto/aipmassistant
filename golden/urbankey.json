@@ -1,0 +1,255 @@
+{
+  "projectId": "urbankey",
+  "set": "dev",
+  "items": [
+    {
+      "id": "urbankey.filter-delivery-date",
+      "kind": "Requirement",
+      "title": "Фильтр по сроку сдачи в форме подбора квартиры",
+      "side": "Xpage",
+      "assignee": null,
+      "due": "2026-09-14T18:00:00+05:00",
+      "dueQuote": "14 сентября",
+      "dueKind": "Explicit",
+      "isPromiseToClient": false,
+      "aliases": [
+        "фильтр по сроку сдачи",
+        "фильтр сроков сдачи"
+      ],
+      "evidence": [
+        "urbankey.cc.09-05",
+        "urbankey.cc.11-30",
+        "urbankey.cc.11-34",
+        "urbankey.cc.11-36",
+        "urbankey.ic.16-05",
+        "urbankey.ic.16-15"
+      ],
+      "traps": [
+        "multi-message-merge",
+        "deadline-via-confirmation"
+      ]
+    },
+    {
+      "id": "urbankey.prices-after-auth",
+      "kind": "Decision",
+      "title": "Цены в карточках объектов видны только авторизованным",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "цены",
+        "после авторизации"
+      ],
+      "evidence": [
+        "urbankey.cc.09-14",
+        "urbankey.cc.09-17",
+        "urbankey.cc.09-20",
+        "stress.09-17"
+      ],
+      "traps": [
+        "clarification-merge",
+        "stress-dedup"
+      ]
+    },
+    {
+      "id": "urbankey.crm-status-list",
+      "kind": "Dependency",
+      "title": "Подрядчик DataBridge присылает полный список статусов CRM",
+      "side": "Contractor",
+      "assignee": null,
+      "due": "2026-09-09T18:00:00+05:00",
+      "dueQuote": "до среды",
+      "dueKind": "Explicit",
+      "isPromiseToClient": false,
+      "aliases": [
+        "список статусов",
+        "статусы crm"
+      ],
+      "evidence": [
+        "urbankey.cc.10-02",
+        "urbankey.call.01-40"
+      ],
+      "traps": [
+        "three-party",
+        "status-change"
+      ]
+    },
+    {
+      "id": "urbankey.crm-mapping-check",
+      "kind": "Task",
+      "title": "Проверить маппинг статусов CRM после получения списка",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "маппинг статусов"
+      ],
+      "evidence": [
+        "urbankey.cc.10-05"
+      ],
+      "traps": [
+        "dependency-link"
+      ]
+    },
+    {
+      "id": "urbankey.crm-request-full-list",
+      "kind": "Task",
+      "title": "Запросить у подрядчика полный список статусов, включая «Бронь истекла»",
+      "side": "Client",
+      "assignee": null,
+      "due": "2026-09-08T18:00:00+05:00",
+      "dueQuote": "сегодня",
+      "dueKind": "Explicit",
+      "isPromiseToClient": false,
+      "aliases": [
+        "запросить у подрядчика",
+        "полный список"
+      ],
+      "evidence": [
+        "urbankey.call.01-55",
+        "urbankey.call.02-13"
+      ],
+      "traps": [
+        "relative-deadline"
+      ]
+    },
+    {
+      "id": "urbankey.video-in-construction",
+      "kind": "Requirement",
+      "title": "Короткие видео mp4 до 100 МБ в разделе «Ход строительства»",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "видео",
+        "ход строительства"
+      ],
+      "evidence": [
+        "urbankey.cc.14-12",
+        "urbankey.cc.14-18",
+        "urbankey.cc.14-25"
+      ],
+      "traps": [
+        "multi-message-merge"
+      ]
+    },
+    {
+      "id": "urbankey.video-limits-answer",
+      "kind": "Task",
+      "title": "Проверить технические ограничения по видео и вернуться с ответом клиенту",
+      "side": "Xpage",
+      "assignee": null,
+      "due": "2026-09-09T15:00:00+05:00",
+      "dueQuote": "завтра до 15:00",
+      "dueKind": "Explicit",
+      "isPromiseToClient": true,
+      "aliases": [
+        "вернёмся",
+        "ограничения по видео"
+      ],
+      "evidence": [
+        "urbankey.cc.14-27",
+        "urbankey.call.02-30"
+      ],
+      "traps": [
+        "promise-vs-internal"
+      ]
+    },
+    {
+      "id": "urbankey.video-storage-check",
+      "kind": "Task",
+      "title": "Проверить ограничения хранения и загрузки видео",
+      "side": "Xpage",
+      "assignee": "Разработчик",
+      "due": "2026-09-09T13:00:00+05:00",
+      "dueQuote": "завтра до 13:00",
+      "dueKind": "Explicit",
+      "isPromiseToClient": false,
+      "aliases": [
+        "ограничения по хранению",
+        "загрузка видео"
+      ],
+      "evidence": [
+        "urbankey.ic.15-10",
+        "urbankey.ic.15-22"
+      ],
+      "traps": [
+        "promise-vs-internal"
+      ]
+    },
+    {
+      "id": "urbankey.saved-selection",
+      "kind": "Requirement",
+      "title": "Сохранение подборки квартир после авторизации",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "сохранять подборку",
+        "подборка квартир"
+      ],
+      "evidence": [
+        "urbankey.call.00-22",
+        "urbankey.call.00-34",
+        "urbankey.call.00-39"
+      ],
+      "traps": []
+    },
+    {
+      "id": "urbankey.requests-history-question",
+      "kind": "OpenQuestion",
+      "title": "Нужна ли история заявок в личном кабинете",
+      "side": "Client",
+      "assignee": null,
+      "due": "2026-09-10T18:00:00+05:00",
+      "dueQuote": "до четверга",
+      "dueKind": "Explicit",
+      "isPromiseToClient": false,
+      "aliases": [
+        "история заявок"
+      ],
+      "evidence": [
+        "urbankey.call.01-02",
+        "urbankey.call.01-26",
+        "stress.09-00",
+        "stress.09-07"
+      ],
+      "traps": [
+        "stress-dedup"
+      ]
+    },
+    {
+      "id": "urbankey.weekly-status-format",
+      "kind": "Task",
+      "title": "Готовить еженедельный статус в новом формате",
+      "side": "Xpage",
+      "assignee": null,
+      "due": "2026-09-11T18:00:00+05:00",
+      "dueQuote": "11 сентября",
+      "dueKind": "Explicit",
+      "isPromiseToClient": false,
+      "aliases": [
+        "еженедельный статус",
+        "формат статуса"
+      ],
+      "evidence": [
+        "urbankey.em.01"
+      ],
+      "traps": [
+        "email-source"
+      ]
+    }
+  ]
+}

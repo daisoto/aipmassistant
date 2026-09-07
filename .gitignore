@@ -1,0 +1,8 @@
+bin/
+obj/
+.vs/
+.idea/
+*.user
+reports/*.md
+!reports/.gitkeep
+appsettings.Local.json

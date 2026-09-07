@@ -1,0 +1,41 @@
+{
+  "projectId": "retailflow",
+  "projectName": "RetailFlow",
+  "projectDescription": "Интернет-магазин розничной сети: каталог, корзина, доставка и программа лояльности.",
+  "sourceId": "retailflow.internal-chat",
+  "kind": "InternalChat",
+  "title": "Внутренний чат команды",
+  "occurredOn": "2026-09-08",
+  "order": 2,
+  "splitByProject": false,
+  "messages": [
+    {
+      "id": "retailflow.ic.11-20",
+      "at": "11:20",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Команда, на запуске доставка: самовывоз по всем регионам, курьер только Москва. Нужно проверить, нет ли ограничений в текущей логике."
+    },
+    {
+      "id": "retailflow.ic.11-34",
+      "at": "11:34",
+      "author": "Разработчик",
+      "side": "Xpage",
+      "text": "Сделать можно, но надо проверить конфиг регионов."
+    },
+    {
+      "id": "retailflow.ic.13-05",
+      "at": "13:05",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Проверьте, пожалуйста, до завтра 14:00."
+    },
+    {
+      "id": "retailflow.ic.14-40",
+      "at": "14:40",
+      "author": "Аналитик",
+      "side": "Xpage",
+      "text": "По loyalty API для чтения баланса всё есть, а подтверждение списания кодом пока не проверяли."
+    }
+  ]
+}

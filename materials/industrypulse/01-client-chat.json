@@ -1,0 +1,111 @@
+{
+  "projectId": "industrypulse",
+  "projectName": "IndustryPulse",
+  "projectDescription": "Внутренний сервис мониторинга оборудования промышленной компании.",
+  "sourceId": "industrypulse.client-chat",
+  "kind": "ClientChat",
+  "title": "Клиентский чат",
+  "occurredOn": "2026-09-08",
+  "order": 1,
+  "splitByProject": false,
+  "messages": [
+    {
+      "id": "industrypulse.cc.09-05",
+      "at": "09:05",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "В дашборде нужен отдельный индикатор аварийных остановок."
+    },
+    {
+      "id": "industrypulse.cc.09-10",
+      "at": "09:10",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Как определяем аварию: по статусу MES или по времени простоя?"
+    },
+    {
+      "id": "industrypulse.cc.09-16",
+      "at": "09:16",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "По статусу MES."
+    },
+    {
+      "id": "industrypulse.cc.09-22",
+      "at": "09:22",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Если MES недоступна, тогда по простою больше 20 минут."
+    },
+    {
+      "id": "industrypulse.cc.09-28",
+      "at": "09:28",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Понял, фиксирую оба правила."
+    },
+    {
+      "id": "industrypulse.cc.10-47",
+      "at": "10:47",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Интегратор обещал спецификацию MES API к пятнице."
+    },
+    {
+      "id": "industrypulse.cc.10-50",
+      "at": "10:50",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Хорошо, после получения спецификации проверим состав данных."
+    },
+    {
+      "id": "industrypulse.cc.12-03",
+      "at": "12:03",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Ещё нужны уведомления начальнику смены."
+    },
+    {
+      "id": "industrypulse.cc.12-08",
+      "at": "12:08",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Через какой канал?"
+    },
+    {
+      "id": "industrypulse.cc.12-12",
+      "at": "12:12",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Пока не решили."
+    },
+    {
+      "id": "industrypulse.cc.12-16",
+      "at": "12:16",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Тогда оставляю открытым вопросом."
+    },
+    {
+      "id": "industrypulse.cc.14-42",
+      "at": "14:42",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "По ролям: оператор видит свой цех, начальник смены — весь завод."
+    },
+    {
+      "id": "industrypulse.cc.14-47",
+      "at": "14:47",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Принято."
+    },
+    {
+      "id": "industrypulse.cc.16-02",
+      "at": "16:02",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Ок."
+    }
+  ]
+}

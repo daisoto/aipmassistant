@@ -1,0 +1,101 @@
+@page "/sources"
+@rendermode InteractiveServer
+@inject IPmStore Store
+@inject PipelineRunner Pipeline
+
+<PageTitle>Источники</PageTitle>
+
+<h1>Источники</h1>
+<p class="muted">
+    Дата источника — база для относительных сроков: «завтра до 15:00» превращается в дату
+    именно от неё, а не от сегодняшнего дня.
+</p>
+
+@if (!string.IsNullOrEmpty(_status))
+{
+    <p class="badge">@_status</p>
+}
+
+<table class="grid">
+    <thead>
+    <tr>
+        <th>Проект</th>
+        <th>Источник</th>
+        <th>Тип</th>
+        <th>Дата</th>
+        <th>Сообщений</th>
+        <th>Статус</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var row in _rows)
+    {
+        <tr>
+            <td>@row.ProjectName</td>
+            <td>@row.Source.Title</td>
+            <td>@KindLabel(row.Source.Kind)</td>
+            <td>@row.Source.OccurredOn.ToString("dd.MM.yyyy")</td>
+            <td class="num">@row.MessageCount</td>
+            <td>@(row.Source.Ingested ? "обработан" : "не обработан")</td>
+            <td>
+                <button disabled="@(_busy || row.Source.Ingested)"
+                        @onclick="() => RunAsync(row.Source.Id)">Прогнать</button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@code {
+    private sealed record Row(Source Source, string ProjectName, int MessageCount);
+
+    private List<Row> _rows = [];
+    private bool _busy;
+    private string _status = "";
+
+    protected override async Task OnInitializedAsync() => await RefreshAsync();
+
+    private async Task RefreshAsync()
+    {
+        var rows = new List<Row>();
+        foreach (var project in await Store.GetProjectsAsync())
+        foreach (var source in await Store.GetSourcesAsync(project.Id))
+        {
+            var messages = await Store.GetMessagesAsync(source.Id);
+            rows.Add(new Row(source, project.Name, messages.Count));
+        }
+
+        _rows = rows;
+    }
+
+    private async Task RunAsync(string sourceId)
+    {
+        _busy = true;
+        try
+        {
+            var report = await Pipeline.RunSourceAsync(sourceId);
+            _status = $"{report.SourceTitle}: кандидатов {report.CandidateCount}, создано {report.Created}, " +
+                      $"обновлено {report.Updated}, заменено {report.Superseded}, шум {report.Noise}, " +
+                      $"сроков отброшено {report.DeadlinesDropped}.";
+            await RefreshAsync();
+        }
+        catch (Exception ex)
+        {
+            _status = "Ошибка: " + ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private static string KindLabel(SourceKind kind) => kind switch
+    {
+        SourceKind.ClientChat => "клиентский чат",
+        SourceKind.InternalChat => "внутренний чат",
+        SourceKind.Email => "письмо",
+        SourceKind.CallTranscript => "транскрипт созвона",
+        _ => kind.ToString()
+    };
+}

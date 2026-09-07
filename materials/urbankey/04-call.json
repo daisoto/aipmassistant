@@ -1,0 +1,111 @@
+{
+  "projectId": "urbankey",
+  "projectName": "UrbanKey",
+  "projectDescription": "Корпоративный сайт девелопера: каталог объектов, подбор квартир, личный кабинет и CRM-интеграция.",
+  "sourceId": "urbankey.call",
+  "kind": "CallTranscript",
+  "title": "Созвон по каталогу и CRM",
+  "occurredOn": "2026-09-08",
+  "order": 4,
+  "splitByProject": false,
+  "messages": [
+    {
+      "id": "urbankey.call.00-00",
+      "at": "00:00",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Предлагаю пройтись по каталогу, личному кабинету и интеграции с CRM."
+    },
+    {
+      "id": "urbankey.call.00-22",
+      "at": "00:22",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "В каталоге хотим возможность сохранять подборку квартир."
+    },
+    {
+      "id": "urbankey.call.00-34",
+      "at": "00:34",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Сохранение подборки только после авторизации?"
+    },
+    {
+      "id": "urbankey.call.00-39",
+      "at": "00:39",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Да, только после входа."
+    },
+    {
+      "id": "urbankey.call.01-02",
+      "at": "01:02",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "По личному кабинету пока не решили, нужна ли история заявок."
+    },
+    {
+      "id": "urbankey.call.01-15",
+      "at": "01:15",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Тогда фиксирую как открытый вопрос."
+    },
+    {
+      "id": "urbankey.call.01-26",
+      "at": "01:26",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Отдел продаж даст решение до четверга."
+    },
+    {
+      "id": "urbankey.call.01-40",
+      "at": "01:40",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "По CRM подрядчик прислал список статусов, но там нет «Бронь истекла»."
+    },
+    {
+      "id": "urbankey.call.01-55",
+      "at": "01:55",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Тогда с вашей стороны нужно запросить у подрядчика полный список, включая этот статус."
+    },
+    {
+      "id": "urbankey.call.02-13",
+      "at": "02:13",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Запрошу сегодня."
+    },
+    {
+      "id": "urbankey.call.02-30",
+      "at": "02:30",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "По видео мы проверим ограничения и вернёмся завтра до 15:00."
+    },
+    {
+      "id": "urbankey.call.02-38",
+      "at": "02:38",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Ок."
+    },
+    {
+      "id": "urbankey.call.02-55",
+      "at": "02:55",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Итого: история заявок — решение до четверга; CRM — ждём полный список статусов; видео — ответ от нас завтра до 15:00."
+    },
+    {
+      "id": "urbankey.call.03-03",
+      "at": "03:03",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Всё верно."
+    }
+  ]
+}

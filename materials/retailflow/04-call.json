@@ -1,0 +1,83 @@
+{
+  "projectId": "retailflow",
+  "projectName": "RetailFlow",
+  "projectDescription": "Интернет-магазин розничной сети: каталог, корзина, доставка и программа лояльности.",
+  "sourceId": "retailflow.call",
+  "kind": "CallTranscript",
+  "title": "Созвон по составу релиза",
+  "occurredOn": "2026-09-08",
+  "order": 4,
+  "splitByProject": false,
+  "messages": [
+    {
+      "id": "retailflow.call.00-00",
+      "at": "00:00",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Нужно зафиксировать состав релиза."
+    },
+    {
+      "id": "retailflow.call.00-15",
+      "at": "00:15",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Давайте по пунктам."
+    },
+    {
+      "id": "retailflow.call.00-21",
+      "at": "00:21",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Самовывоз — все регионы, курьер — только Москва, бонусы — остаются."
+    },
+    {
+      "id": "retailflow.call.00-34",
+      "at": "00:34",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Баннер когда сможете передать?"
+    },
+    {
+      "id": "retailflow.call.00-39",
+      "at": "00:39",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Завтра до 12:00."
+    },
+    {
+      "id": "retailflow.call.00-52",
+      "at": "00:52",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "По бонусам ещё хотим подтверждение списания кодом из SMS."
+    },
+    {
+      "id": "retailflow.call.01-05",
+      "at": "01:05",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Это новое требование. Проверим поддержку текущим API."
+    },
+    {
+      "id": "retailflow.call.01-18",
+      "at": "01:18",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Хорошо."
+    },
+    {
+      "id": "retailflow.call.01-25",
+      "at": "01:25",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Вернёмся с ответом по SMS завтра до конца дня."
+    },
+    {
+      "id": "retailflow.call.01-33",
+      "at": "01:33",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Ок."
+    }
+  ]
+}

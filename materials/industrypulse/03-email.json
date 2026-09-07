@@ -1,0 +1,20 @@
+{
+  "projectId": "industrypulse",
+  "projectName": "IndustryPulse",
+  "projectDescription": "Внутренний сервис мониторинга оборудования промышленной компании.",
+  "sourceId": "industrypulse.email",
+  "kind": "Email",
+  "title": "Письмо: уточнение ролей",
+  "occurredOn": "2026-09-08",
+  "order": 3,
+  "splitByProject": false,
+  "messages": [
+    {
+      "id": "industrypulse.em.01",
+      "at": null,
+      "author": "product@industrypulse.test",
+      "side": "Client",
+      "text": "Тема: Уточнение ролей. Дополняем роли: оператор — свой цех; начальник смены — весь завод; администратор — все заводы группы. Просим учесть в следующем плановом цикле. Срок не критичный."
+    }
+  ]
+}

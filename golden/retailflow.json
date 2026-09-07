@@ -1,0 +1,200 @@
+{
+  "projectId": "retailflow",
+  "set": "dev",
+  "items": [
+    {
+      "id": "retailflow.delivery-scope",
+      "kind": "Decision",
+      "title": "Самовывоз — все регионы, курьер — только Москва, временно на запуск",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "самовывоз",
+        "курьер",
+        "доставка"
+      ],
+      "evidence": [
+        "retailflow.cc.10-18",
+        "retailflow.cc.10-22",
+        "retailflow.cc.10-24",
+        "retailflow.call.00-21"
+      ],
+      "traps": [
+        "supersede"
+      ]
+    },
+    {
+      "id": "retailflow.loyalty-balance-check",
+      "kind": "Requirement",
+      "title": "Проверка бонусного баланса до оплаты через текущий loyalty API",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "бонусный баланс",
+        "loyalty api"
+      ],
+      "evidence": [
+        "retailflow.cc.10-47",
+        "retailflow.cc.10-50",
+        "retailflow.cc.10-52"
+      ],
+      "traps": []
+    },
+    {
+      "id": "retailflow.banner",
+      "kind": "Task",
+      "title": "Прислать баннер для главной",
+      "side": "Client",
+      "assignee": null,
+      "due": "2026-09-09T12:00:00+05:00",
+      "dueQuote": "завтра до 12:00",
+      "dueKind": "Explicit",
+      "isPromiseToClient": false,
+      "aliases": [
+        "баннер"
+      ],
+      "evidence": [
+        "retailflow.cc.12-14",
+        "retailflow.cc.15-10",
+        "retailflow.call.00-34",
+        "retailflow.call.00-39",
+        "stress.09-05",
+        "stress.09-10"
+      ],
+      "traps": [
+        "deadline-appears-later",
+        "stress-dedup"
+      ]
+    },
+    {
+      "id": "retailflow.regions-config-check",
+      "kind": "Task",
+      "title": "Проверить конфиг регионов и ограничения логики доставки",
+      "side": "Xpage",
+      "assignee": "Разработчик",
+      "due": "2026-09-09T14:00:00+05:00",
+      "dueQuote": "до завтра 14:00",
+      "dueKind": "Explicit",
+      "isPromiseToClient": false,
+      "aliases": [
+        "конфиг регионов"
+      ],
+      "evidence": [
+        "retailflow.ic.11-20",
+        "retailflow.ic.11-34",
+        "retailflow.ic.13-05"
+      ],
+      "traps": []
+    },
+    {
+      "id": "retailflow.loyalty-test-access",
+      "kind": "Task",
+      "title": "Выдать тестовый доступ к loyalty API",
+      "side": "Client",
+      "assignee": null,
+      "due": "2026-09-10T16:00:00+05:00",
+      "dueQuote": "до 16:00 10 сентября",
+      "dueKind": "Explicit",
+      "isPromiseToClient": false,
+      "aliases": [
+        "тестовый доступ"
+      ],
+      "evidence": [
+        "retailflow.em.01"
+      ],
+      "traps": [
+        "email-source"
+      ]
+    },
+    {
+      "id": "retailflow.confirm-connection",
+      "kind": "Task",
+      "title": "Подтвердить успешное подключение после выдачи доступа",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "подтвердить подключение"
+      ],
+      "evidence": [
+        "retailflow.em.01"
+      ],
+      "traps": [
+        "dependency-link"
+      ]
+    },
+    {
+      "id": "retailflow.sms-confirmation",
+      "kind": "Requirement",
+      "title": "Подтверждение списания бонусов кодом из SMS",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "подтверждение списания",
+        "код из sms"
+      ],
+      "evidence": [
+        "retailflow.call.00-52",
+        "retailflow.call.01-05"
+      ],
+      "traps": [
+        "new-requirement-on-call"
+      ]
+    },
+    {
+      "id": "retailflow.sms-api-check-answer",
+      "kind": "Task",
+      "title": "Проверить поддержку SMS-подтверждения текущим API и вернуться с ответом",
+      "side": "Xpage",
+      "assignee": null,
+      "due": "2026-09-09T18:00:00+05:00",
+      "dueQuote": "завтра до конца дня",
+      "dueKind": "Explicit",
+      "isPromiseToClient": true,
+      "aliases": [
+        "вернёмся с ответом",
+        "поддержка api"
+      ],
+      "evidence": [
+        "retailflow.call.01-25"
+      ],
+      "traps": [
+        "promise-vs-internal"
+      ]
+    },
+    {
+      "id": "retailflow.release-scope",
+      "kind": "Decision",
+      "title": "Состав релиза зафиксирован: доставка и бонусы",
+      "side": "Xpage",
+      "assignee": null,
+      "due": null,
+      "dueQuote": null,
+      "dueKind": "None",
+      "isPromiseToClient": false,
+      "aliases": [
+        "состав релиза"
+      ],
+      "evidence": [
+        "retailflow.call.00-00",
+        "retailflow.call.00-21"
+      ],
+      "traps": []
+    }
+  ]
+}

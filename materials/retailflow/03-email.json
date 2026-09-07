@@ -1,0 +1,20 @@
+{
+  "projectId": "retailflow",
+  "projectName": "RetailFlow",
+  "projectDescription": "Интернет-магазин розничной сети: каталог, корзина, доставка и программа лояльности.",
+  "sourceId": "retailflow.email",
+  "kind": "Email",
+  "title": "Письмо: тестовый доступ к loyalty API",
+  "occurredOn": "2026-09-08",
+  "order": 3,
+  "splitByProject": false,
+  "messages": [
+    {
+      "id": "retailflow.em.01",
+      "at": null,
+      "author": "it@retailflow.test",
+      "side": "Client",
+      "text": "Тема: Тестовый доступ к loyalty API. Тестовый доступ к loyalty API подготовим до 16:00 10 сентября. После выдачи доступа просим подтвердить успешное подключение."
+    }
+  ]
+}

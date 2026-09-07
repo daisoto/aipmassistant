@@ -1,0 +1,97 @@
+{
+  "projectId": "industrypulse",
+  "projectName": "IndustryPulse",
+  "projectDescription": "Внутренний сервис мониторинга оборудования промышленной компании.",
+  "sourceId": "industrypulse.call",
+  "kind": "CallTranscript",
+  "title": "Созвон по аварийным сценариям",
+  "occurredOn": "2026-09-08",
+  "order": 4,
+  "splitByProject": false,
+  "messages": [
+    {
+      "id": "industrypulse.call.00-00",
+      "at": "00:00",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Сегодня уточним аварийные сценарии и уведомления."
+    },
+    {
+      "id": "industrypulse.call.00-14",
+      "at": "00:14",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Если MES отдаёт аварийный статус — показываем аварию сразу."
+    },
+    {
+      "id": "industrypulse.call.00-27",
+      "at": "00:27",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Если MES недоступна?"
+    },
+    {
+      "id": "industrypulse.call.00-33",
+      "at": "00:33",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Тогда авария — простой больше 20 минут."
+    },
+    {
+      "id": "industrypulse.call.00-47",
+      "at": "00:47",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Но порог 20 минут может поменяться после пилота."
+    },
+    {
+      "id": "industrypulse.call.00-59",
+      "at": "00:59",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Тогда делаем порог настраиваемым параметром?"
+    },
+    {
+      "id": "industrypulse.call.01-07",
+      "at": "01:07",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Да."
+    },
+    {
+      "id": "industrypulse.call.01-21",
+      "at": "01:21",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Канал уведомлений определили?"
+    },
+    {
+      "id": "industrypulse.call.01-27",
+      "at": "01:27",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Нет, выбираем между email и корпоративным мессенджером."
+    },
+    {
+      "id": "industrypulse.call.01-36",
+      "at": "01:36",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "Оставляем открытым вопросом."
+    },
+    {
+      "id": "industrypulse.call.01-50",
+      "at": "01:50",
+      "author": "Клиент",
+      "side": "Client",
+      "text": "Интегратор подтвердил API к пятнице."
+    },
+    {
+      "id": "industrypulse.call.02-02",
+      "at": "02:02",
+      "author": "PM Xpage",
+      "side": "Xpage",
+      "text": "После получения спецификации наша команда проверит состав данных."
+    }
+  ]
+}
