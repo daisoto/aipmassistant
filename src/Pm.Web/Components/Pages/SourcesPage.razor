@@ -35,7 +35,7 @@
             <td>@row.ProjectName</td>
             <td>@row.Source.Title</td>
             <td>@KindLabel(row.Source.Kind)</td>
-            <td>@row.Source.OccurredOn.ToString("dd.MM.yyyy")</td>
+            <td>@(row.Source.OccurredOn.ToString("dd.MM.yyyy"))</td>
             <td class="num">@row.MessageCount</td>
             <td>@(row.Source.Ingested ? "обработан" : "не обработан")</td>
             <td>

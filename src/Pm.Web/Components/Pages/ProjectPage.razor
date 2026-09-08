@@ -39,7 +39,7 @@ else
                                 @onclick="() => Select(item)">
                                 <div class="title">@item.Title</div>
                                 <div class="meta">
-                                    <span class="chip kind-@item.Kind.ToString().ToLowerInvariant()">@KindLabel(item.Kind)</span>
+                                    <span class="chip kind-@(item.Kind.ToString().ToLowerInvariant())">@KindLabel(item.Kind)</span>
                                     <span class="chip side">@SideLabel(item.Side)</span>
                                     @if (!string.IsNullOrWhiteSpace(item.Assignee))
                                     {
@@ -47,7 +47,7 @@ else
                                     }
                                     @if (item.DueKind == DueKind.Explicit && item.DueAt is not null)
                                     {
-                                        <span class="chip due">@item.DueAt.Value.ToLocalTime().ToString("dd.MM HH:mm")</span>
+                                        <span class="chip due">@(item.DueAt.Value.ToLocalTime().ToString("dd.MM HH:mm"))</span>
                                     }
                                     else if (item.DueKind == DueKind.Vague)
                                     {
@@ -62,14 +62,11 @@ else
         }
     </div>
 
-    @{
-        var others = TrackerViews.Uncategorized(_items);
-    }
-    @if (others.Count > 0)
+    @if (Others.Count > 0)
     {
-        <h2>Решения и зафиксированное <span class="count">@others.Count</span></h2>
+        <h2>Решения и зафиксированное <span class="count">@Others.Count</span></h2>
         <ul class="items flat">
-            @foreach (var item in others)
+            @foreach (var item in Others)
             {
                 <li class="@(_selected?.Id == item.Id ? "item selected" : "item")" @onclick="() => Select(item)">
                     <div class="title">
@@ -147,6 +144,8 @@ else
     private IReadOnlyList<Source> _sources = [];
     private IReadOnlyList<WorkItem> _items = [];
     private WorkItem? _selected;
+
+    private IReadOnlyList<WorkItem> Others => TrackerViews.Uncategorized(_items);
     private IReadOnlyList<Message> _evidence = [];
 
     protected override async Task OnParametersSetAsync()

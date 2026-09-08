@@ -3,7 +3,7 @@
 @inject IPmStore Store
 @inject PostMeetingComposer Composer
 @inject ILlmClient Llm
-@inject Microsoft.Extensions.Options.IOptions<Pm.Infrastructure.Llm.LlmOptions> LlmOptions
+@inject Microsoft.Extensions.Options.IOptions<Pm.Infrastructure.Llm.LlmOptions> LlmSettings
 
 <PageTitle>Post-meeting</PageTitle>
 
@@ -12,7 +12,7 @@
     <a href="@($"/project/{ProjectId}")">← к трекеру</a>
     @if (_source is not null)
     {
-        <span> · дата встречи @_source.OccurredOn.ToString("dd.MM.yyyy")</span>
+        <span> · дата встречи @(_source.OccurredOn.ToString("dd.MM.yyyy"))</span>
     }
 </p>
 
@@ -94,7 +94,7 @@
         _status = "";
         try
         {
-            var polisher = LlmOptions.Value.PolishPostMeeting ? Llm : null;
+            var polisher = LlmSettings.Value.PolishPostMeeting ? Llm : null;
             _doc = await Composer.ComposeAsync(SourceId, polisher);
             _status = _doc.PolishApplied
                 ? "Документ сформирован, формулировки отполированы моделью."
