@@ -3,7 +3,7 @@
 AI-ассистент проектного менеджера — MVP по кейсу Xpage. Разбирает проектную коммуникацию,
 собирает единый трекер задач и договорённостей и формирует post-meeting в формате Xpage.
 
-Стек: .NET 9, Blazor Server, PostgreSQL 17 + pgvector, EF Core 9.
+Стек: .NET 8, Blazor Server, PostgreSQL 17 + pgvector, EF Core 8.
 
 ---
 
