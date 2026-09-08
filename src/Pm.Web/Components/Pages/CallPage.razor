@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject IPmStore Store
 @inject PostMeetingComposer Composer
+@inject PipelineRunner Pipeline
 @inject ILlmClient Llm
 @inject Microsoft.Extensions.Options.IOptions<Pm.Infrastructure.Llm.LlmOptions> LlmSettings
 
@@ -13,11 +14,25 @@
     @if (_source is not null)
     {
         <span> · дата встречи @(_source.OccurredOn.ToString("dd.MM.yyyy"))</span>
+        <span> · @_messages.Count реплик</span>
     }
 </p>
 
+@if (_source is not null && !_source.Ingested)
+{
+    <div class="badge warn">
+        Источник ещё не обработан пайплайном, поэтому связывать post-meeting не с чем.
+        Сначала прогоните его — тогда реплики созвона превратятся в задачи и договорённости.
+    </div>
+}
+
 <div class="actions">
-    <button class="primary" disabled="@_busy" @onclick="ComposeAsync">Сформировать post-meeting</button>
+    <button disabled="@(_busy || _source is null || _source.Ingested)" @onclick="RunSourceAsync">
+        Прогнать источник
+    </button>
+    <button class="primary" disabled="@(_busy || _source is null || !_source.Ingested)" @onclick="ComposeAsync">
+        Сформировать post-meeting
+    </button>
 </div>
 
 @if (!string.IsNullOrEmpty(_status))
@@ -40,13 +55,28 @@
     </section>
 
     <section>
-        <h2>Post-meeting</h2>
+        <h2>
+            Post-meeting
+            @if (_doc is not null)
+            {
+                <span class="count">@BulletCount пунктов</span>
+            }
+        </h2>
+
         @if (_doc is null)
         {
             <p class="muted">
                 Нажмите «Сформировать post-meeting». В документ попадёт только то, что затронуто
                 этим созвоном; разложение по секциям детерминированное.
             </p>
+        }
+        else if (BulletCount == 0)
+        {
+            <div class="badge warn">
+                Документ пуст: ни одна сущность трекера не связана с репликами этого созвона.
+                Обычно это значит, что источник не прогнан или пайплайн не нашёл в нём действий.
+                Проверьте трекер проекта — если он пустой, начните с загрузки и прогона источников.
+            </div>
         }
         else
         {
@@ -63,7 +93,19 @@
                     Использован неотполированный вариант.
                 </div>
             }
+
             <pre class="postmeeting">@_doc.RenderedText</pre>
+
+            <details class="sections">
+                <summary>Состав по секциям</summary>
+                <ul>
+                    @foreach (var part in _doc.Sections)
+                    {
+                        <li>@part.Title: @part.Bullets.Count</li>
+                    }
+                </ul>
+            </details>
+
             <p class="muted small">
                 Проверку, корректировку и отправку выполняет PM — сервис с клиентом не общается.
             </p>
@@ -81,11 +123,35 @@
     private bool _busy;
     private string _status = "";
 
-    protected override async Task OnParametersSetAsync()
+    private int BulletCount => _doc?.Sections.Sum(s => s.Bullets.Count) ?? 0;
+
+    protected override async Task OnParametersSetAsync() => await RefreshAsync();
+
+    private async Task RefreshAsync()
     {
         _source = await Store.GetSourceAsync(SourceId);
         _messages = await Store.GetMessagesAsync(SourceId);
         _doc = (await Store.GetPostMeetingsAsync(ProjectId)).FirstOrDefault(d => d.SourceId == SourceId);
+    }
+
+    private async Task RunSourceAsync()
+    {
+        _busy = true;
+        try
+        {
+            var report = await Pipeline.RunSourceAsync(SourceId);
+            _status = $"Обработано реплик {report.MessageCount}: создано {report.Created}, " +
+                      $"обновлено {report.Updated}, заменено {report.Superseded}, шум {report.Noise}.";
+            await RefreshAsync();
+        }
+        catch (Exception ex)
+        {
+            _status = "Ошибка прогона: " + ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
     }
 
     private async Task ComposeAsync()
@@ -96,9 +162,12 @@
         {
             var polisher = LlmSettings.Value.PolishPostMeeting ? Llm : null;
             _doc = await Composer.ComposeAsync(SourceId, polisher);
-            _status = _doc.PolishApplied
-                ? "Документ сформирован, формулировки отполированы моделью."
-                : "Документ сформирован.";
+
+            _status = BulletCount == 0
+                ? "Документ сформирован, но пуст — с этим созвоном не связано ни одной сущности."
+                : _doc.PolishApplied
+                    ? $"Документ сформирован ({BulletCount} пунктов), формулировки отполированы моделью."
+                    : $"Документ сформирован: {BulletCount} пунктов.";
         }
         catch (Exception ex)
         {

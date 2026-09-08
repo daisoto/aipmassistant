@@ -137,3 +137,8 @@ pre.postmeeting {
     padding: 14px 16px;
     margin: 0;
 }
+
+details.sections { margin-top: 12px; font-size: 13px; color: var(--ink-2); }
+details.sections summary { cursor: pointer; color: var(--accent); }
+details.sections ul { margin: 8px 0 0; padding-left: 20px; }
+.two-col h2 .count { font-size: 12px; font-weight: 400; }

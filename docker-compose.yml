@@ -7,7 +7,9 @@ services:
       POSTGRES_USER: aipm
       POSTGRES_PASSWORD: aipm
     ports:
-      - "5432:5432"
+      # 5433 намеренно: 5432 часто занят локально установленным PostgreSQL,
+      # и тогда приложение молча стучится не в тот сервер и получает 28P01.
+      - "5433:5432"
     volumes:
       - aipm-pgdata:/var/lib/postgresql/data
     healthcheck:

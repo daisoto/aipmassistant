@@ -29,7 +29,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(new PmDbContextOptions { EmbeddingDimensions = embeddingOptions.Dimensions });
 
         var connectionString = config.GetConnectionString("Postgres")
-                               ?? "Host=localhost;Port=5432;Database=aipm;Username=aipm;Password=aipm";
+                               ?? "Host=localhost;Port=5433;Database=aipm;Username=aipm;Password=aipm";
 
         // DataSource с включённым pgvector: без UseVector() Npgsql не знает типа vector.
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);

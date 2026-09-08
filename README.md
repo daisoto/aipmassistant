@@ -4,17 +4,43 @@ AI-ассистент проектного менеджера — MVP по ке�
 собирает единый трекер задач и договорённостей и формирует post-meeting в формате Xpage.
 
 Стек: .NET 8, Blazor Server, PostgreSQL 17 + pgvector, EF Core 8.
+TargetFramework — `net8.0`; SDK 9 и 10 собирают его без изменений.
 
 ---
 
 ## Запуск
 
 ```bash
-docker compose up -d                      # PostgreSQL с pgvector на localhost:5432
+docker compose up -d                      # PostgreSQL с pgvector на localhost:5433
 dotnet restore
 dotnet build
 dotnet run --project src/Pm.Web           # http://localhost:5080
 ```
+
+Порт 5433, а не 5432: на 5432 обычно уже слушает локально установленный PostgreSQL,
+и приложение молча уходит к нему вместо контейнера.
+
+### Если при старте `28P01: password authentication failed`
+
+Приложение достучалось до какого-то PostgreSQL, но не до нашего. Две причины:
+
+1. **Отвечает чужой сервер.** Проверьте, что на порту именно контейнер:
+
+   ```bash
+   docker compose ps
+   docker exec -it aipm-postgres psql -U aipm -d aipm -c "select version()"
+   ```
+
+2. **Том остался от прошлого запуска.** `POSTGRES_PASSWORD` применяется только при первом
+   создании тома, поэтому смена пароля в compose ничего не меняет. Пересоздать:
+
+   ```bash
+   docker compose down -v
+   docker compose up -d
+   ```
+
+   `-v` удаляет том с данными — на MVP это безопасно, состояние восстанавливается кнопкой
+   «Загрузить материалы».
 
 Схема БД создаётся на старте (`EnsureCreated`), миграций пока нет — на четырёхдневном MVP
 модель меняется по нескольку раз в день. Перед пилотом на реальных данных перейти на миграции:
