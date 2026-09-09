@@ -69,6 +69,28 @@ public interface IPmStore
 
     Task<IReadOnlyList<LlmCall>> GetLlmCallsAsync(int limit, CancellationToken ct = default);
 
-    /// <summary>Полная очистка состояния. Нужна прогонщику метрик и кнопке «Загрузить заново».</summary>
+    /// <summary>
+    /// Полная очистка состояния. Нужна прогонщику метрик и кнопке «Загрузить заново».
+    /// Журнал LLM намеренно переживает очистку: иначе сравнить прогоны «до» и «после»
+    /// правки промпта нечем — Pm.Eval вызывает Reset в начале каждого запуска.
+    /// </summary>
     Task ResetAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Выполняет body в одной транзакции. Прогон источника пишет сущности по одной,
+    /// поэтому без этого падение на середине оставляет половину состояния в базе,
+    /// а источник — непомеченным: повторный прогон заводит всё заново.
+    /// </summary>
+    Task RunInTransactionAsync(Func<CancellationToken, Task> body, CancellationToken ct = default);
+}
+
+/// <summary>
+/// Что сейчас обрабатывается — читается реализациями <see cref="ILlmClient"/> при записи
+/// в журнал. Scoped-объект вместо трёх новых параметров в методах интерфейса.
+/// </summary>
+public sealed class LlmRunContext
+{
+    public string? CorrelationId { get; set; }
+    public string? ProjectId { get; set; }
+    public string? SourceId { get; set; }
 }

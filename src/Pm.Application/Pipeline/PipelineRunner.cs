@@ -15,6 +15,7 @@ public sealed class PipelineRunner(
     Resolver resolver,
     QuoteValidator quoteValidator,
     Threader threader,
+    LlmRunContext run,
     ILogger<PipelineRunner> logger)
 {
     public async Task<IngestReport> RunSourceAsync(string sourceId, CancellationToken ct = default)
@@ -40,6 +41,28 @@ public sealed class PipelineRunner(
             return report;
         }
 
+        run.CorrelationId = Guid.NewGuid().ToString("n");
+        run.ProjectId = project.Id;
+        run.SourceId = source.Id;
+        report.CorrelationId = run.CorrelationId;
+
+        // Сущности пишутся по одной, поэтому без транзакции падение на середине оставляет
+        // половину состояния в базе при непомеченном источнике — повторный прогон дублирует.
+        await store.RunInTransactionAsync(
+            token => IngestAsync(project, source, messages, report, token), ct);
+
+        report.ElapsedMs = sw.ElapsedMilliseconds;
+        logger.LogInformation(
+            "Источник {Source}: кандидатов {Cand}, создано {New}, обновлено {Upd}, заменено {Sup}, шум {Noise}, {Ms} мс",
+            source.Title, report.CandidateCount, report.Created, report.Updated, report.Superseded, report.Noise,
+            report.ElapsedMs);
+
+        return report;
+    }
+
+    private async Task IngestAsync(
+        Project project, Source source, IReadOnlyList<Message> messages, IngestReport report, CancellationToken ct)
+    {
         foreach (var block in threader.Split(messages))
         {
             var known = await store.GetItemsAsync(project.Id, ct);
@@ -73,14 +96,6 @@ public sealed class PipelineRunner(
         }
 
         await store.MarkSourceIngestedAsync(source.Id, ct);
-
-        report.ElapsedMs = sw.ElapsedMilliseconds;
-        logger.LogInformation(
-            "Источник {Source}: кандидатов {Cand}, создано {New}, обновлено {Upd}, заменено {Sup}, шум {Noise}, {Ms} мс",
-            source.Title, report.CandidateCount, report.Created, report.Updated, report.Superseded, report.Noise,
-            report.ElapsedMs);
-
-        return report;
     }
 
     /// <summary>Прогон всех необработанных источников проекта в порядке загрузки.</summary>

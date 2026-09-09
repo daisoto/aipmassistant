@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject IPmStore Store
 @inject PipelineRunner Pipeline
+@inject MaterialLoader Loader
 
 <PageTitle>Источники</PageTitle>
 
@@ -10,6 +11,16 @@
     Дата источника — база для относительных сроков: «завтра до 15:00» превращается в дату
     именно от неё, а не от сегодняшнего дня.
 </p>
+
+<div class="actions">
+    <label class="button">
+        Загрузить файл материалов
+        <InputFile OnChange="UploadAsync" accept=".json" disabled="@_busy" style="display:none" />
+    </label>
+    <span class="muted small">
+        JSON того же вида, что в <code>materials/</code>: projectId, sourceId, occurredOn и messages.
+    </span>
+</div>
 
 @if (!string.IsNullOrEmpty(_status))
 {
@@ -54,7 +65,30 @@
     private bool _busy;
     private string _status = "";
 
+    /// <summary>Материалы — доверенный вход, но файл приходит извне: размер режем до разбора.</summary>
+    private const long MaxUploadBytes = 8 * 1024 * 1024;
+
     protected override async Task OnInitializedAsync() => await RefreshAsync();
+
+    private async Task UploadAsync(InputFileChangeEventArgs e)
+    {
+        _busy = true;
+        try
+        {
+            await using var stream = e.File.OpenReadStream(MaxUploadBytes);
+            var loaded = await Loader.LoadStreamAsync(stream, e.File.Name);
+            await RefreshAsync();
+            _status = $"«{e.File.Name}»: загружено источников {loaded}. Прогоните их кнопкой в таблице.";
+        }
+        catch (Exception ex)
+        {
+            _status = "Не загружено — " + ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
 
     private async Task RefreshAsync()
     {

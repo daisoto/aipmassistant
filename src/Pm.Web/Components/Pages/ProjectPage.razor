@@ -18,6 +18,8 @@ else
         {
             <a class="button" href="@($"/project/{ProjectId}/call/{source.Id}")">Post-meeting: @source.Title</a>
         }
+        <a class="button" href="@($"/export/{ProjectId}/tracker.md")">Выгрузить трекер (Markdown)</a>
+        <a class="button" href="@($"/export/{ProjectId}/tracker.json")">Выгрузить трекер (JSON)</a>
     </div>
 
     <div class="views">

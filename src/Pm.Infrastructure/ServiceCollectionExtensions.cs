@@ -8,6 +8,7 @@ using Pm.Application;
 using Pm.Application.Deadlines;
 using Pm.Application.Pipeline;
 using Pm.Application.PostMeeting;
+using Pm.Application.Views;
 using Pm.Infrastructure.Data;
 using Pm.Infrastructure.Embeddings;
 using Pm.Infrastructure.Llm;
@@ -40,7 +41,14 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<PmDbContext>((sp, options) =>
             options.UseNpgsql(sp.GetRequiredService<NpgsqlDataSource>(), npgsql => npgsql.UseVector()));
 
+        // Фабрика нужна только журналу LLM: он пишется вне транзакции прогона,
+        // иначе запись о провалившемся вызове откатывается вместе с прогоном.
+        services.AddDbContextFactory<PmDbContext>((sp, options) =>
+            options.UseNpgsql(sp.GetRequiredService<NpgsqlDataSource>(), npgsql => npgsql.UseVector()),
+            lifetime: ServiceLifetime.Singleton);
+
         services.AddScoped<IPmStore, EfPmStore>();
+        services.AddScoped<LlmRunContext>();
         services.AddScoped<ICandidateIndex, SqlCandidateIndex>();
         services.AddScoped<MaterialLoader>();
 
@@ -53,6 +61,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<Resolver>();
         services.AddScoped<PipelineRunner>();
         services.AddScoped<PostMeetingComposer>();
+        services.AddScoped<Exporter>();
 
         AddLlm(services, llmOptions);
         AddEmbeddings(services, embeddingOptions);
@@ -75,7 +84,8 @@ public static class ServiceCollectionExtensions
         }
         else
         {
-            services.AddSingleton<ILlmClient, HeuristicLlmClient>();
+            // Scoped, а не singleton: baseline теперь тоже пишет журнал, а IPmStore — scoped.
+            services.AddScoped<ILlmClient, HeuristicLlmClient>();
         }
     }
 

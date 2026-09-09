@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Pm.Application;
 using Pm.Application.Text;
@@ -14,9 +15,38 @@ namespace Pm.Infrastructure.Llm;
 ///
 /// Заменять его LLM-провайдером — не «переписать», а поменять Llm:Provider в конфиге.
 /// </summary>
-public sealed partial class HeuristicLlmClient : ILlmClient
+public sealed partial class HeuristicLlmClient(IPmStore store, LlmRunContext run) : ILlmClient
 {
     public string Name => "heuristic-baseline";
+
+    /// <summary>
+    /// Baseline пишет журнал наравне с моделью. Иначе на конфигурации по умолчанию
+    /// таблица пуста, и сравнить два провайдера по журналу нельзя.
+    /// </summary>
+    private async Task LogAsync(string operation, int promptChars, int responseChars, long elapsedMs)
+    {
+        try
+        {
+            await store.AddLlmCallAsync(new LlmCall
+            {
+                Id = Guid.NewGuid().ToString("n"),
+                CorrelationId = run.CorrelationId,
+                Operation = operation,
+                Provider = Name,
+                ProjectId = run.ProjectId,
+                SourceId = run.SourceId,
+                SchemaMode = "none",
+                PromptChars = promptChars,
+                ResponseChars = responseChars,
+                ElapsedMs = elapsedMs
+            }, CancellationToken.None);
+        }
+        catch
+        {
+            // ponytail: журнал baseline не стоит того, чтобы ронять прогон. Провайдер
+            // с настоящей моделью логирует отказ записи через ILogger.
+        }
+    }
 
     /// <summary>Откалиброван по стресс-тесту: при 0.72 смешанные сообщения давали дубли.</summary>
     public const double MergeThreshold = 0.58;
@@ -63,8 +93,9 @@ public sealed partial class HeuristicLlmClient : ILlmClient
         @"завтра", @"сегодня"
     ];
 
-    public Task<ExtractionResult> ExtractAsync(ExtractionRequest request, CancellationToken ct = default)
+    public async Task<ExtractionResult> ExtractAsync(ExtractionRequest request, CancellationToken ct = default)
     {
+        var sw = Stopwatch.StartNew();
         var result = new ExtractionResult();
         var block = request.Block;
         Candidate? previous = null;
@@ -107,7 +138,8 @@ public sealed partial class HeuristicLlmClient : ILlmClient
             previous = candidate;
         }
 
-        return Task.FromResult(result);
+        await LogAsync("extraction", block.Sum(m => m.Text.Length), result.Candidates.Count, sw.ElapsedMilliseconds);
+        return result;
     }
 
     private static Candidate? Build(
@@ -243,20 +275,28 @@ public sealed partial class HeuristicLlmClient : ILlmClient
                                                         || trimmed == a));
     }
 
-    public Task<ResolveDecision> ResolveAsync(ResolveRequest request, CancellationToken ct = default)
+    public async Task<ResolveDecision> ResolveAsync(ResolveRequest request, CancellationToken ct = default)
+    {
+        var sw = Stopwatch.StartNew();
+        var decision = Decide(request);
+        await LogAsync("resolve", request.Candidate.Body.Length, decision.Reason.Length, sw.ElapsedMilliseconds);
+        return decision;
+    }
+
+    private static ResolveDecision Decide(ResolveRequest request)
     {
         var best = request.Nearest.FirstOrDefault();
         if (best is null)
-            return Task.FromResult(new ResolveDecision(ResolveOp.New, null, null, "baseline: похожих нет", 0.9));
+            return new ResolveDecision(ResolveOp.New, null, null, "baseline: похожих нет", 0.9);
 
         var lower = request.Candidate.Body.ToLowerInvariant().Replace('ё', 'е');
         var contradicts = SupersedeMarkers.Any(m => lower.Contains(m, StringComparison.Ordinal));
 
         if (contradicts && best.Score >= 0.50 && best.Item.Kind is ItemKind.Requirement or ItemKind.Decision)
         {
-            return Task.FromResult(new ResolveDecision(
+            return new ResolveDecision(
                 ResolveOp.Supersede, best.Item.Id, null,
-                $"baseline: маркер отмены при близости {best.Score:F2}", 0.7));
+                $"baseline: маркер отмены при близости {best.Score:F2}", 0.7);
         }
 
         if (best.Score >= MergeThreshold)
@@ -267,13 +307,13 @@ public sealed partial class HeuristicLlmClient : ILlmClient
                 DeadlineMessageId = request.Candidate.Deadline?.SourceMessageId,
                 Assignee = request.Candidate.Assignee?.Value
             };
-            return Task.FromResult(new ResolveDecision(
+            return new ResolveDecision(
                 ResolveOp.Update, best.Item.Id, patch,
-                $"baseline: близость {best.Score:F2} выше порога слияния", 0.7));
+                $"baseline: близость {best.Score:F2} выше порога слияния", 0.7);
         }
 
-        return Task.FromResult(new ResolveDecision(
-            ResolveOp.New, null, null, $"baseline: близость {best.Score:F2} ниже порога слияния", 0.6));
+        return new ResolveDecision(
+            ResolveOp.New, null, null, $"baseline: близость {best.Score:F2} ниже порога слияния", 0.6);
     }
 
     /// <summary>Baseline формулировки не трогает — PhrasingGuard такой ответ принимает без замечаний.</summary>

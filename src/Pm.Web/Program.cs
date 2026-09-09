@@ -1,4 +1,6 @@
+using System.Text;
 using Microsoft.Extensions.Options;
+using Pm.Application.Views;
 using Pm.Infrastructure;
 using Pm.Infrastructure.Data;
 using Pm.Infrastructure.Llm;
@@ -20,6 +22,22 @@ if (!app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.UseAntiforgery();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+
+// Выгрузка на диск. Обычные GET-ссылки, а не JS-скачивание: браузер сам сохранит файл,
+// а сторонний сервис возьмёт тот же URL курлом.
+var export = app.MapGroup("/export");
+
+export.MapGet("/{projectId}/tracker.json", async (string projectId, Exporter exporter, CancellationToken ct) =>
+    Download(await exporter.TrackerJsonAsync(projectId, ct), "application/json", $"{projectId}-tracker.json"));
+
+export.MapGet("/{projectId}/tracker.md", async (string projectId, Exporter exporter, CancellationToken ct) =>
+    Download(await exporter.TrackerMarkdownAsync(projectId, ct), "text/markdown", $"{projectId}-tracker.md"));
+
+export.MapGet("/postmeeting/{sourceId}", async (string sourceId, Exporter exporter, CancellationToken ct) =>
+    Download(await exporter.PostMeetingAsync(sourceId, ct), "text/markdown", $"{sourceId}-postmeeting.md"));
+
+static IResult Download(string content, string contentType, string fileName)
+    => Results.File(Encoding.UTF8.GetBytes(content), contentType, fileName);
 
 // Схема создаётся на старте: на четырёхдневном MVP модель меняется по нескольку раз в день,
 // и держать миграции в актуальном состоянии дороже, чем пересоздать базу.

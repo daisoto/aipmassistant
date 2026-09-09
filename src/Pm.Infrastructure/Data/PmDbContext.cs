@@ -127,9 +127,15 @@ public sealed class PmDbContext(DbContextOptions<PmDbContext> options, PmDbConte
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).HasMaxLength(64);
+            e.Property(x => x.CorrelationId).HasMaxLength(64);
             e.Property(x => x.Operation).HasMaxLength(64);
-            e.Property(x => x.Provider).HasMaxLength(64);
+            // Provider — это "model@baseUrl": 64 символов не хватает уже на обычный
+            // корпоративный эндпоинт, а обрезка падала бы как 22001 прямо из finally.
+            e.Property(x => x.Provider).HasMaxLength(512);
             e.Property(x => x.ProjectId).HasMaxLength(64);
+            e.Property(x => x.SourceId).HasMaxLength(64);
+            e.Property(x => x.SchemaMode).HasMaxLength(32);
+            e.HasIndex(x => x.CorrelationId);
         });
 
         // Enum'ы храним строками: содержимое БД и сырые SQL-запросы остаются читаемыми

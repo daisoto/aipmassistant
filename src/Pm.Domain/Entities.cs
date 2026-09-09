@@ -119,15 +119,36 @@ public sealed class PostMeetingDoc
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
-/// <summary>Журнал обращений к модели: нужен для отладки, замера латентности и демонстрации.</summary>
+/// <summary>
+/// Журнал обращений к модели. Одна запись — одна попытка HTTP, а не один логический вызов:
+/// отказ строгой схемы с последующим повтором в json_object даёт две записи, иначе факт
+/// «провайдер не принимает json_schema» виден только в логе и живёт до перезапуска.
+/// </summary>
 public sealed class LlmCall
 {
     public string Id { get; set; } = "";
+
+    /// <summary>Общий на весь прогон источника: связывает записи трекера с породившими их вызовами.</summary>
+    public string? CorrelationId { get; set; }
+
     public string Operation { get; set; } = "";
     public string Provider { get; set; } = "";
     public string? ProjectId { get; set; }
+    public string? SourceId { get; set; }
+
+    /// <summary>Номер попытки, начиная с 1.</summary>
+    public int Attempt { get; set; } = 1;
+
+    /// <summary>json_schema | json_object | none — в каком режиме запрашивался ответ.</summary>
+    public string SchemaMode { get; set; } = "none";
+
     public int PromptChars { get; set; }
     public int ResponseChars { get; set; }
+
+    /// <summary>Сырой запрос и ответ. Пишутся, только если включён Llm:LogPayloads.</summary>
+    public string? RequestJson { get; set; }
+    public string? ResponseJson { get; set; }
+
     public long ElapsedMs { get; set; }
     public bool Failed { get; set; }
     public string? Error { get; set; }

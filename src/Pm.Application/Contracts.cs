@@ -69,6 +69,10 @@ public sealed class IngestReport
 {
     public string SourceId { get; set; } = "";
     public string SourceTitle { get; set; } = "";
+
+    /// <summary>Ключ, по которому в журнале LLM находятся вызовы именно этого прогона.</summary>
+    public string? CorrelationId { get; set; }
+
     public int MessageCount { get; set; }
     public int CandidateCount { get; set; }
     public int Created { get; set; }

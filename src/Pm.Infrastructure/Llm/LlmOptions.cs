@@ -19,6 +19,13 @@ public sealed class LlmOptions
 
     /// <summary>Полировать ли формулировки post-meeting моделью (состав пунктов при этом не меняется).</summary>
     public bool PolishPostMeeting { get; set; }
+
+    /// <summary>
+    /// Писать в журнал сырой запрос и ответ модели. Включено: проект демонстрационный,
+    /// материалы синтетические, а без содержимого журнал не отвечает на главный вопрос —
+    /// что именно вернула модель. Перед реальной перепиской выключить.
+    /// </summary>
+    public bool LogPayloads { get; set; } = true;
 }
 
 public sealed class EmbeddingOptions

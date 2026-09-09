@@ -8,7 +8,7 @@ namespace Pm.Infrastructure.Data;
 /// Реализация состояния поверх EF Core. Все выборки сущностей трекера идут по ProjectId —
 /// изоляция контекста между проектами обеспечивается тем, что другого входа к данным нет.
 /// </summary>
-public sealed class EfPmStore(PmDbContext db) : IPmStore
+public sealed class EfPmStore(PmDbContext db, IDbContextFactory<PmDbContext> contexts) : IPmStore
 {
     public async Task<IReadOnlyList<Project>> GetProjectsAsync(CancellationToken ct = default)
         => await db.Projects.AsNoTracking().OrderBy(p => p.Name).ToListAsync(ct);
@@ -138,11 +138,16 @@ public sealed class EfPmStore(PmDbContext db) : IPmStore
         db.ChangeTracker.Clear();
     }
 
+    /// <summary>
+    /// Пишется отдельным контекстом и без токена отмены — намеренно.
+    /// Через общий контекст запись откатывалась бы вместе с провалившимся прогоном,
+    /// а с отменённым токеном SaveChanges бросал бы прямо из finally, подменяя исходное исключение.
+    /// </summary>
     public async Task AddLlmCallAsync(LlmCall call, CancellationToken ct = default)
     {
-        db.LlmCalls.Add(call);
-        await db.SaveChangesAsync(ct);
-        db.Entry(call).State = EntityState.Detached;
+        await using var isolated = await contexts.CreateDbContextAsync(CancellationToken.None);
+        isolated.LlmCalls.Add(call);
+        await isolated.SaveChangesAsync(CancellationToken.None);
     }
 
     public async Task MarkSourceIngestedAsync(string sourceId, CancellationToken ct = default)
@@ -159,12 +164,35 @@ public sealed class EfPmStore(PmDbContext db) : IPmStore
 
     public async Task ResetAsync(CancellationToken ct = default)
     {
+        // "LlmCalls" в списке нет: журнал должен переживать очистку, иначе дельта между
+        // прогонами Pm.Eval теряется вместе с состоянием.
         await db.Database.ExecuteSqlRawAsync(
             """
             TRUNCATE TABLE "WorkItemRevisions", "WorkItemEvidence", "PostMeetingSections",
-                           "PostMeetings", "WorkItems", "Messages", "Sources", "Projects", "LlmCalls"
+                           "PostMeetings", "WorkItems", "Messages", "Sources", "Projects"
             RESTART IDENTITY CASCADE;
             """, ct);
         db.ChangeTracker.Clear();
+    }
+
+    public async Task RunInTransactionAsync(Func<CancellationToken, Task> body, CancellationToken ct = default)
+    {
+        // ponytail: одна транзакция на весь прогон источника. Потолок — источник целиком
+        // либо применяется, либо нет; если понадобится дожимать частично, резать по блокам Threader'а.
+        await using var tx = await db.Database.BeginTransactionAsync(ct);
+        try
+        {
+            await body(ct);
+            await tx.CommitAsync(ct);
+        }
+        catch
+        {
+            await tx.RollbackAsync(CancellationToken.None);
+            throw;
+        }
+        finally
+        {
+            db.ChangeTracker.Clear();
+        }
     }
 }

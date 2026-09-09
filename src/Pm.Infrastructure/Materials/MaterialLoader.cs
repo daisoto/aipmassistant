@@ -46,31 +46,73 @@ public sealed class MaterialLoader(IPmStore store, ILogger<MaterialLoader> logge
         AllowTrailingCommas = true
     };
 
-    public async Task<int> LoadAllAsync(CancellationToken ct = default)
+    /// <summary>
+    /// Читает папку с материалами. Путь параметризован: без него материалы можно взять
+    /// только из репозитория, а вводить данные извне — единственный способ добавить проект.
+    /// Принимает и папку, и отдельный файл.
+    /// </summary>
+    public async Task<int> LoadAllAsync(string? path = null, CancellationToken ct = default)
     {
-        var root = RepoPaths.Materials;
-        if (!Directory.Exists(root))
-            throw new DirectoryNotFoundException($"Не найдена папка с материалами: {root}");
+        path ??= RepoPaths.Materials;
 
-        var files = Directory.EnumerateFiles(root, "*.json", SearchOption.AllDirectories)
-            .OrderBy(f => f, StringComparer.Ordinal)
-            .ToList();
+        List<string> files;
+        if (File.Exists(path))
+        {
+            files = [path];
+        }
+        else if (Directory.Exists(path))
+        {
+            files = Directory.EnumerateFiles(path, "*.json", SearchOption.AllDirectories)
+                .OrderBy(f => f, StringComparer.Ordinal)
+                .ToList();
+        }
+        else
+        {
+            throw new DirectoryNotFoundException($"Не найдены материалы: {path}");
+        }
 
         var loaded = 0;
-        foreach (var path in files)
+        foreach (var file in files)
         {
-            var file = JsonSerializer.Deserialize<MaterialFile>(await File.ReadAllTextAsync(path, ct), Json);
-            if (file is null)
-            {
-                logger.LogWarning("Не удалось разобрать {Path}", path);
-                continue;
-            }
-
-            loaded += await LoadFileAsync(file, ct);
+            await using var stream = File.OpenRead(file);
+            loaded += await LoadStreamAsync(stream, file, ct);
         }
 
         logger.LogInformation("Загружено источников: {Count}", loaded);
         return loaded;
+    }
+
+    /// <summary>
+    /// Разбор одного файла из потока — вход для загрузки через браузер, где файла на диске нет.
+    /// Имя нужно только для сообщения об ошибке.
+    /// </summary>
+    public async Task<int> LoadStreamAsync(Stream stream, string name, CancellationToken ct = default)
+    {
+        MaterialFile? file;
+        try
+        {
+            file = await JsonSerializer.DeserializeAsync<MaterialFile>(stream, Json, ct);
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidDataException($"{name}: не разбирается как материал — {ex.Message}", ex);
+        }
+
+        if (file is null)
+            throw new InvalidDataException($"{name}: пустой файл.");
+
+        // Валидация на границе доверия: без projectId и сообщений источник осядет в базе
+        // как пустой мусор, найти который потом можно только руками в SQL.
+        if (string.IsNullOrWhiteSpace(file.ProjectId))
+            throw new InvalidDataException($"{name}: не задан projectId.");
+        if (string.IsNullOrWhiteSpace(file.SourceId))
+            throw new InvalidDataException($"{name}: не задан sourceId.");
+        if (file.Messages.Count == 0)
+            throw new InvalidDataException($"{name}: в файле нет сообщений.");
+        if (file.Messages.Any(m => string.IsNullOrWhiteSpace(m.Id)))
+            throw new InvalidDataException($"{name}: у сообщения нет id.");
+
+        return await LoadFileAsync(file, ct);
     }
 
     private async Task<int> LoadFileAsync(MaterialFile file, CancellationToken ct)
