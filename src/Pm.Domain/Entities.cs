@@ -145,6 +145,13 @@ public sealed class LlmCall
     public int PromptChars { get; set; }
     public int ResponseChars { get; set; }
 
+    /// <summary>
+    /// Реальные токены — заполняет только провайдер, который их возвращает. Символы стоимость
+    /// не оценивают: отношение к токенам на русском плавает, и схема в PromptChars не учтена.
+    /// </summary>
+    public int? InputTokens { get; set; }
+    public int? OutputTokens { get; set; }
+
     /// <summary>Сырой запрос и ответ. Пишутся, только если включён Llm:LogPayloads.</summary>
     public string? RequestJson { get; set; }
     public string? ResponseJson { get; set; }

@@ -161,9 +161,13 @@ async Task<int> LlmLogAsync()
 
     foreach (var call in calls.Reverse())
     {
+        var tokens = call.InputTokens is null
+            ? $"{call.PromptChars,6} симв."
+            : $"{call.InputTokens,6}→{call.OutputTokens,-6} ток.";
+
         Console.WriteLine(
             $"{call.At:dd.MM HH:mm:ss}  {call.Operation,-10} {call.SchemaMode,-11} попытка {call.Attempt}  " +
-            $"{call.ElapsedMs,6} мс  {(call.Failed ? "ОШИБКА" : "ок")}  [{call.CorrelationId}]");
+            $"{tokens}  {call.ElapsedMs,6} мс  {(call.Failed ? "ОШИБКА" : "ок")}  [{call.CorrelationId}]");
         if (call.Error is not null) Console.WriteLine($"    {call.Error}");
         if (call.ResponseJson is not null) Console.WriteLine($"    ответ: {Trim(call.ResponseJson)}");
     }

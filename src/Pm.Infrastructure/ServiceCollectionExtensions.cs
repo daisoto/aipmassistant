@@ -71,7 +71,17 @@ public static class ServiceCollectionExtensions
 
     private static void AddLlm(IServiceCollection services, LlmOptions options)
     {
-        if (string.Equals(options.Provider, "OpenAiCompatible", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(options.Provider, "Anthropic", StringComparison.OrdinalIgnoreCase))
+        {
+            // Ключ из конфига, иначе SDK сам возьмёт ANTHROPIC_API_KEY из окружения —
+            // класть его в appsettings не нужно и не стоит.
+            var timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+            services.AddSingleton(_ => string.IsNullOrWhiteSpace(options.ApiKey)
+                ? new Anthropic.AnthropicClient { Timeout = timeout }
+                : new Anthropic.AnthropicClient { ApiKey = options.ApiKey, Timeout = timeout });
+            services.AddScoped<ILlmClient, AnthropicLlmClient>();
+        }
+        else if (string.Equals(options.Provider, "OpenAiCompatible", StringComparison.OrdinalIgnoreCase))
         {
             services.AddHttpClient<ILlmClient, OpenAiCompatibleLlmClient>(client =>
             {

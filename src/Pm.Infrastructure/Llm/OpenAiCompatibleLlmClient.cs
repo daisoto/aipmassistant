@@ -16,7 +16,7 @@ namespace Pm.Infrastructure.Llm;
 /// в контуре Xpage: меняется только BaseUrl, пайплайн об этом не знает.
 ///
 /// Ответ запрашивается через response_format: json_schema со strict: true. Если провайдер
-/// схему не поддерживает, включается json_object и разбор первого JSON-объекта из ответа.
+/// схему не поддерживает, ограничение снимается совсем и из ответа разбирается первый JSON-объект.
 /// </summary>
 public sealed class OpenAiCompatibleLlmClient(
     HttpClient http,
@@ -27,87 +27,41 @@ public sealed class OpenAiCompatibleLlmClient(
 {
     private readonly LlmOptions _opt = options.Value;
 
-    private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
-    {
-        Converters = { new JsonStringEnumConverter() }
-    };
-
     public string Name => $"{_opt.Model}@{_opt.BaseUrl}";
 
     public async Task<ExtractionResult> ExtractAsync(ExtractionRequest request, CancellationToken ct = default)
-    {
-        var json = await CompleteAsync(
+        => LlmJson.ToExtraction(await CompleteAsync(
             Prompts.ExtractionSystem,
             Prompts.ExtractionUser(request),
             "extraction",
             Prompts.ExtractionSchema,
             request.Project.Id,
-            ct);
-
-        var dto = JsonSerializer.Deserialize<ExtractionDto>(json, Json)
-                  ?? new ExtractionDto();
-
-        return new ExtractionResult
-        {
-            Candidates = dto.Candidates.Select(ToCandidate).ToList(),
-            NoiseMessageIds = dto.NoiseMessageIds
-        };
-    }
+            ct));
 
     public async Task<ResolveDecision> ResolveAsync(ResolveRequest request, CancellationToken ct = default)
-    {
-        var json = await CompleteAsync(
+        => LlmJson.ToDecision(await CompleteAsync(
             Prompts.ResolveSystem,
             Prompts.ResolveUser(request),
             "resolve",
             Prompts.ResolveSchema,
             request.Project.Id,
-            ct);
-
-        var dto = JsonSerializer.Deserialize<ResolveDto>(json, Json);
-        if (dto is null)
-            return new ResolveDecision(ResolveOp.New, null, null, "Ответ резолвера не разобран", 0);
-
-        var patch = dto.Patch is null
-            ? null
-            : new WorkItemPatch
-            {
-                Title = dto.Patch.Title,
-                Body = dto.Patch.Body,
-                Side = Parse<Side>(dto.Patch.Side),
-                Kind = Parse<ItemKind>(dto.Patch.Kind),
-                Assignee = dto.Patch.Assignee,
-                DeadlineQuote = dto.Patch.DeadlineQuote,
-                DeadlineMessageId = dto.Patch.DeadlineMessageId,
-                IsPromiseToClient = dto.Patch.IsPromiseToClient,
-                Status = Parse<ItemStatus>(dto.Patch.Status)
-            };
-
-        return new ResolveDecision(
-            Parse<ResolveOp>(dto.Op) ?? ResolveOp.New,
-            dto.TargetId,
-            patch,
-            dto.Reason ?? "",
-            dto.Confidence);
-    }
+            ct));
 
     public async Task<IReadOnlyList<PostMeetingSection>> PolishAsync(
         IReadOnlyList<PostMeetingSection> draft, CancellationToken ct = default)
     {
-        var payload = JsonSerializer.Serialize(new { sections = draft }, Json);
+        var payload = JsonSerializer.Serialize(new { sections = draft }, LlmJson.Options);
         var json = await CompleteAsync(
             Prompts.PolishSystem, payload, "polish", Prompts.PolishSchema, null, ct);
 
-        var dto = JsonSerializer.Deserialize<PolishDto>(json, Json);
-        return dto?.Sections.Select(s => new PostMeetingSection { Title = s.Title, Bullets = s.Bullets }).ToList()
-               ?? draft;
+        return LlmJson.ToSections(json, draft);
     }
 
     /// <summary>Попыток на каждый режим ответа. Три при паузах 1/2/4 с — минута на переживание 429.</summary>
     private const int MaxAttemptsPerMode = 3;
 
     /// <summary>
-    /// Два режима подряд — json_schema, затем json_object; внутри каждого до трёх попыток.
+    /// Два режима подряд — json_schema, затем без ограничения; внутри каждого до трёх попыток.
     /// Повторяются только сетевые сбои, таймауты, 429 и 5xx: 4xx означает, что режим
     /// провайдером не поддерживается, и повтор в нём бессмысленен.
     /// </summary>
@@ -133,7 +87,7 @@ public sealed class OpenAiCompatibleLlmClient(
                     if (!Retryable(ex))
                     {
                         logger.LogWarning(ex, "Режим {Mode} провайдером не принят, перехожу к следующему",
-                            strict ? "json_schema" : "json_object");
+                            strict ? "json_schema" : "без ограничения");
                         break;
                     }
 
@@ -180,7 +134,7 @@ public sealed class OpenAiCompatibleLlmClient(
                 ProjectId = projectId ?? run.ProjectId,
                 SourceId = run.SourceId,
                 Attempt = attempt,
-                SchemaMode = strict ? "json_schema" : "json_object",
+                SchemaMode = strict ? "json_schema" : "none",
                 PromptChars = system.Length + user.Length + (strict ? schema.Length : 0),
                 ResponseChars = content?.Length ?? 0,
                 RequestJson = _opt.LogPayloads ? body.ToJsonString() : null,
@@ -216,8 +170,11 @@ public sealed class OpenAiCompatibleLlmClient(
                 new JsonObject { ["role"] = "user", ["content"] = user })
         };
 
-        body["response_format"] = strict
-            ? new JsonObject
+        // ponytail: во втором режиме ограничение снимается совсем, а не меняется на json_object —
+        // его понимают не все провайдеры: LM Studio отвечает 400 «must be json_schema or text».
+        // Отсутствие поля принимают все, форму держит промпт, обёртку ```json снимает ExtractJson.
+        if (strict)
+            body["response_format"] = new JsonObject
             {
                 ["type"] = "json_schema",
                 ["json_schema"] = new JsonObject
@@ -226,8 +183,7 @@ public sealed class OpenAiCompatibleLlmClient(
                     ["strict"] = true,
                     ["schema"] = JsonNode.Parse(schema)
                 }
-            }
-            : new JsonObject { ["type"] = "json_object" };
+            };
 
         return body;
     }
@@ -247,8 +203,14 @@ public sealed class OpenAiCompatibleLlmClient(
         var parsed = await response.Content.ReadFromJsonAsync<ChatResponse>(ct)
                      ?? throw new JsonException("Пустой ответ модели.");
 
-        return parsed.Choices.FirstOrDefault()?.Message.Content
-               ?? throw new JsonException("Ответ модели не содержит content.");
+        var content = parsed.Choices.FirstOrDefault()?.Message.Content;
+
+        // Пустая строка, а не null — штатный ответ reasoning-модели, которая израсходовала
+        // бюджет на рассуждения и до content не дошла: HTTP 200, finish_reason stop, пусто.
+        // Проверка на null её пропускала, и отказ всплывал невнятной ошибкой разбора JSON.
+        return string.IsNullOrWhiteSpace(content)
+            ? throw new JsonException("Ответ модели не содержит content.")
+            : content;
     }
 
     /// <summary>Таймаут и сетевой сбой лечатся повтором, 429 и 5xx — тоже; остальные 4xx — нет.</summary>
@@ -284,29 +246,6 @@ public sealed class OpenAiCompatibleLlmClient(
         public TimeSpan? RetryAfter { get; } = retryAfter;
     }
 
-    private static Candidate ToCandidate(CandidateDto d) => new()
-    {
-        TempId = d.TempId,
-        Kind = Parse<ItemKind>(d.Kind) ?? ItemKind.Task,
-        Title = d.Title,
-        Body = d.Body,
-        Side = Parse<Side>(d.Side) ?? Side.Xpage,
-        IsPromiseToClient = d.IsPromiseToClient,
-        EvidenceMessageIds = d.EvidenceMessageIds,
-        Rationale = d.Rationale,
-        Assignee = string.IsNullOrWhiteSpace(d.Assignee)
-            ? null
-            : new Attributed<string>(d.Assignee, d.AssigneeQuote ?? d.Assignee,
-                d.DeadlineMessageId ?? d.EvidenceMessageIds.FirstOrDefault() ?? ""),
-        Deadline = string.IsNullOrWhiteSpace(d.DeadlineQuote)
-            ? null
-            : new Attributed<string>(d.DeadlineQuote, d.DeadlineQuote,
-                d.DeadlineMessageId ?? d.EvidenceMessageIds.FirstOrDefault() ?? "")
-    };
-
-    private static T? Parse<T>(string? value) where T : struct, Enum
-        => Enum.TryParse<T>(value, ignoreCase: true, out var parsed) ? parsed : null;
-
     private sealed record ChatResponse(
         [property: JsonPropertyName("choices")] List<ChatChoice> Choices);
 
@@ -315,59 +254,4 @@ public sealed class OpenAiCompatibleLlmClient(
 
     private sealed record ChatMessage(
         [property: JsonPropertyName("content")] string? Content);
-
-    private sealed class ExtractionDto
-    {
-        public List<CandidateDto> Candidates { get; set; } = [];
-        public List<string> NoiseMessageIds { get; set; } = [];
-    }
-
-    private sealed class CandidateDto
-    {
-        public string TempId { get; set; } = "";
-        public string? Kind { get; set; }
-        public string Title { get; set; } = "";
-        public string Body { get; set; } = "";
-        public string? Side { get; set; }
-        public string? Assignee { get; set; }
-        public string? AssigneeQuote { get; set; }
-        public string? DeadlineQuote { get; set; }
-        public string? DeadlineMessageId { get; set; }
-        public bool IsPromiseToClient { get; set; }
-        public List<string> EvidenceMessageIds { get; set; } = [];
-        public string Rationale { get; set; } = "";
-    }
-
-    private sealed class ResolveDto
-    {
-        public string? Op { get; set; }
-        public string? TargetId { get; set; }
-        public PatchDto? Patch { get; set; }
-        public string? Reason { get; set; }
-        public double Confidence { get; set; }
-    }
-
-    private sealed class PatchDto
-    {
-        public string? Title { get; set; }
-        public string? Body { get; set; }
-        public string? Side { get; set; }
-        public string? Kind { get; set; }
-        public string? Assignee { get; set; }
-        public string? DeadlineQuote { get; set; }
-        public string? DeadlineMessageId { get; set; }
-        public bool? IsPromiseToClient { get; set; }
-        public string? Status { get; set; }
-    }
-
-    private sealed class PolishDto
-    {
-        public List<SectionDto> Sections { get; set; } = [];
-    }
-
-    private sealed class SectionDto
-    {
-        public string Title { get; set; } = "";
-        public List<string> Bullets { get; set; } = [];
-    }
 }
